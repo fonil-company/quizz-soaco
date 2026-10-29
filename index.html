@@ -301,7 +301,8 @@
     text-transform: uppercase;
     color: var(--steel);
   }
-  .field input {
+  .field input, .field select {
+    width: 100%;
     font: inherit;
     font-size: 16px;
     color: var(--navy);
@@ -312,8 +313,19 @@
     outline: none;
     transition: border-color .2s ease, box-shadow .2s ease;
   }
-  .field input:focus { border-color: var(--gold); box-shadow: 0 0 0 4px rgba(248,172,26,.25); }
-  .field.invalid input { border-color: #FF6B5B; }
+  .field select {
+    appearance: none;
+    -webkit-appearance: none;
+    cursor: pointer;
+    padding-right: 44px;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23051D59' stroke-width='2.6' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 14px center;
+    background-size: 18px;
+  }
+  .field select:disabled { cursor: not-allowed; background-color: #D9DEE6; color: #6A7487; }
+  .field input:focus, .field select:focus { border-color: var(--gold); box-shadow: 0 0 0 4px rgba(248,172,26,.25); }
+  .field.invalid input, .field.invalid select { border-color: #FF6B5B; }
   .field .err { font-size: 12px; color: #FF9A8F; font-weight: 600; min-height: 0; }
   .row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
   .privacy {
@@ -675,6 +687,12 @@ const SOLUTIONS = {
 };
 
 /* =========================================================
+   ESTADOS E CIDADES ATENDIDOS (municípios oficiais do IBGE)
+   ========================================================= */
+const ESTADOS = { PI: "Piauí", MA: "Maranhão" };
+const CIDADES = {"PI":["Acauã","Agricolândia","Água Branca","Alagoinha do Piauí","Alegrete do Piauí","Alto Longá","Altos","Alvorada do Gurguéia","Amarante","Angical do Piauí","Anísio de Abreu","Antônio Almeida","Aroazes","Aroeiras do Itaim","Arraial","Assunção do Piauí","Avelino Lopes","Baixa Grande do Ribeiro","Barra D'Alcântara","Barras","Barreiras do Piauí","Barro Duro","Batalha","Bela Vista do Piauí","Belém do Piauí","Beneditinos","Bertolínia","Betânia do Piauí","Boa Hora","Bocaina","Bom Jesus","Bom Princípio do Piauí","Bonfim do Piauí","Boqueirão do Piauí","Brasileira","Brejo do Piauí","Buriti dos Lopes","Buriti dos Montes","Cabeceiras do Piauí","Cajazeiras do Piauí","Cajueiro da Praia","Caldeirão Grande do Piauí","Campinas do Piauí","Campo Alegre do Fidalgo","Campo Grande do Piauí","Campo Largo do Piauí","Campo Maior","Canavieira","Canto do Buriti","Capitão de Campos","Capitão Gervásio Oliveira","Caracol","Caraúbas do Piauí","Caridade do Piauí","Castelo do Piauí","Caxingó","Cocal","Cocal de Telha","Cocal dos Alves","Coivaras","Colônia do Gurguéia","Colônia do Piauí","Conceição do Canindé","Coronel José Dias","Corrente","Cristalândia do Piauí","Cristino Castro","Curimatá","Currais","Curral Novo do Piauí","Curralinhos","Demerval Lobão","Dirceu Arcoverde","Dom Expedito Lopes","Dom Inocêncio","Domingos Mourão","Elesbão Veloso","Eliseu Martins","Esperantina","Fartura do Piauí","Flores do Piauí","Floresta do Piauí","Floriano","Francinópolis","Francisco Ayres","Francisco Macedo","Francisco Santos","Fronteiras","Geminiano","Gilbués","Guadalupe","Guaribas","Hugo Napoleão","Ilha Grande","Inhuma","Ipiranga do Piauí","Isaías Coelho","Itainópolis","Itaueira","Jacobina do Piauí","Jaicós","Jardim do Mulato","Jatobá do Piauí","Jerumenha","João Costa","Joaquim Pires","Joca Marques","José de Freitas","Juazeiro do Piauí","Júlio Borges","Jurema","Lagoa Alegre","Lagoa de São Francisco","Lagoa do Barro do Piauí","Lagoa do Piauí","Lagoa do Sítio","Lagoinha do Piauí","Landri Sales","Luís Correia","Luzilândia","Madeiro","Manoel Emídio","Marcolândia","Marcos Parente","Massapê do Piauí","Matias Olímpio","Miguel Alves","Miguel Leão","Milton Brandão","Monsenhor Gil","Monsenhor Hipólito","Monte Alegre do Piauí","Morro Cabeça no Tempo","Morro do Chapéu do Piauí","Murici dos Portelas","Nazaré do Piauí","Nazária","Nossa Senhora de Nazaré","Nossa Senhora dos Remédios","Nova Santa Rita","Novo Oriente do Piauí","Novo Santo Antônio","Oeiras","Olho D'Água do Piauí","Padre Marcos","Paes Landim","Pajeú do Piauí","Palmeira do Piauí","Palmeirais","Paquetá","Parnaguá","Parnaíba","Passagem Franca do Piauí","Patos do Piauí","Pau D'Arco do Piauí","Paulistana","Pavussu","Pedro II","Pedro Laurentino","Picos","Pimenteiras","Pio IX","Piracuruca","Piripiri","Porto","Porto Alegre do Piauí","Prata do Piauí","Queimada Nova","Redenção do Gurguéia","Regeneração","Riacho Frio","Ribeira do Piauí","Ribeiro Gonçalves","Rio Grande do Piauí","Santa Cruz do Piauí","Santa Cruz dos Milagres","Santa Filomena","Santa Luz","Santa Rosa do Piauí","Santana do Piauí","Santo Antônio de Lisboa","Santo Antônio dos Milagres","Santo Inácio do Piauí","São Braz do Piauí","São Félix do Piauí","São Francisco de Assis do Piauí","São Francisco do Piauí","São Gonçalo do Gurguéia","São Gonçalo do Piauí","São João da Canabrava","São João da Fronteira","São João da Serra","São João da Varjota","São João do Arraial","São João do Piauí","São José do Divino","São José do Peixe","São José do Piauí","São Julião","São Lourenço do Piauí","São Luis do Piauí","São Miguel da Baixa Grande","São Miguel do Fidalgo","São Miguel do Tapuio","São Pedro do Piauí","São Raimundo Nonato","Sebastião Barros","Sebastião Leal","Sigefredo Pacheco","Simões","Simplício Mendes","Socorro do Piauí","Sussuapara","Tamboril do Piauí","Tanque do Piauí","Teresina","União","Uruçuí","Valença do Piauí","Várzea Branca","Várzea Grande","Vera Mendes","Vila Nova do Piauí","Wall Ferraz"],"MA":["Açailândia","Afonso Cunha","Água Doce do Maranhão","Alcântara","Aldeias Altas","Altamira do Maranhão","Alto Alegre do Maranhão","Alto Alegre do Pindaré","Alto Parnaíba","Amapá do Maranhão","Amarante do Maranhão","Anajatuba","Anapurus","Apicum-Açu","Araguanã","Araioses","Arame","Arari","Axixá","Bacabal","Bacabeira","Bacuri","Bacurituba","Balsas","Barão de Grajaú","Barra do Corda","Barreirinhas","Bela Vista do Maranhão","Belágua","Benedito Leite","Bequimão","Bernardo do Mearim","Boa Vista do Gurupi","Bom Jardim","Bom Jesus das Selvas","Bom Lugar","Brejo","Brejo de Areia","Buriti","Buriti Bravo","Buriticupu","Buritirana","Cachoeira Grande","Cajapió","Cajari","Campestre do Maranhão","Cândido Mendes","Cantanhede","Capinzal do Norte","Carolina","Carutapera","Caxias","Cedral","Central do Maranhão","Centro do Guilherme","Centro Novo do Maranhão","Chapadinha","Cidelândia","Codó","Coelho Neto","Colinas","Conceição do Lago-Açu","Coroatá","Cururupu","Davinópolis","Dom Pedro","Duque Bacelar","Esperantinópolis","Estreito","Feira Nova do Maranhão","Fernando Falcão","Formosa da Serra Negra","Fortaleza dos Nogueiras","Fortuna","Godofredo Viana","Gonçalves Dias","Governador Archer","Governador Edison Lobão","Governador Eugênio Barros","Governador Luiz Rocha","Governador Newton Bello","Governador Nunes Freire","Graça Aranha","Grajaú","Guimarães","Humberto de Campos","Icatu","Igarapé do Meio","Igarapé Grande","Imperatriz","Itaipava do Grajaú","Itapecuru Mirim","Itinga do Maranhão","Jatobá","Jenipapo dos Vieiras","João Lisboa","Joselândia","Junco do Maranhão","Lago da Pedra","Lago do Junco","Lago dos Rodrigues","Lago Verde","Lagoa do Mato","Lagoa Grande do Maranhão","Lajeado Novo","Lima Campos","Loreto","Luís Domingues","Magalhães de Almeida","Maracaçumé","Marajá do Sena","Maranhãozinho","Mata Roma","Matinha","Matões","Matões do Norte","Milagres do Maranhão","Mirador","Miranda do Norte","Mirinzal","Monção","Montes Altos","Morros","Nina Rodrigues","Nova Colinas","Nova Iorque","Nova Olinda do Maranhão","Olho d'Água das Cunhãs","Olinda Nova do Maranhão","Paço do Lumiar","Palmeirândia","Paraibano","Parnarama","Passagem Franca","Pastos Bons","Paulino Neves","Paulo Ramos","Pedreiras","Pedro do Rosário","Penalva","Peri Mirim","Peritoró","Pindaré-Mirim","Pinheiro","Pio XII","Pirapemas","Poção de Pedras","Porto Franco","Porto Rico do Maranhão","Presidente Dutra","Presidente Juscelino","Presidente Médici","Presidente Sarney","Presidente Vargas","Primeira Cruz","Raposa","Riachão","Ribamar Fiquene","Rosário","Sambaíba","Santa Filomena do Maranhão","Santa Helena","Santa Inês","Santa Luzia","Santa Luzia do Paruá","Santa Quitéria do Maranhão","Santa Rita","Santana do Maranhão","Santo Amaro do Maranhão","Santo Antônio dos Lopes","São Benedito do Rio Preto","São Bento","São Bernardo","São Domingos do Azeitão","São Domingos do Maranhão","São Félix de Balsas","São Francisco do Brejão","São Francisco do Maranhão","São João Batista","São João do Carú","São João do Paraíso","São João do Soter","São João dos Patos","São José de Ribamar","São José dos Basílios","São Luís","São Luís Gonzaga do Maranhão","São Mateus do Maranhão","São Pedro da Água Branca","São Pedro dos Crentes","São Raimundo das Mangabeiras","São Raimundo do Doca Bezerra","São Roberto","São Vicente Ferrer","Satubinha","Senador Alexandre Costa","Senador La Rocque","Serrano do Maranhão","Sítio Novo","Sucupira do Norte","Sucupira do Riachão","Tasso Fragoso","Timbiras","Timon","Trizidela do Vale","Tufilândia","Tuntum","Turiaçu","Turilândia","Tutóia","Urbano Santos","Vargem Grande","Viana","Vila Nova dos Martírios","Vitória do Mearim","Vitorino Freire","Zé Doca"]};
+
+/* =========================================================
    ESTADO E RENDERIZAÇÃO
    ========================================================= */
 const app = document.getElementById("app");
@@ -796,7 +814,16 @@ function renderForm() {
         <div class="field"><label for="whats">WhatsApp</label><input id="whats" name="whats" type="tel" inputmode="numeric" autocomplete="tel" placeholder="(00) 00000-0000" value="${esc(l.whats || "")}"><span class="err"></span></div>
         <div class="row">
           <div class="field"><label for="empresa">Empresa</label><input id="empresa" name="empresa" autocomplete="organization" placeholder="Nome da empresa" value="${esc(l.empresa || "")}"><span class="err"></span></div>
-          <div class="field"><label for="cidade">Cidade / UF</label><input id="cidade" name="cidade" autocomplete="address-level2" placeholder="Ex.: Campinas / SP" value="${esc(l.cidade || "")}"><span class="err"></span></div>
+          <div class="field"><label for="cnpj">CNPJ</label><input id="cnpj" name="cnpj" autocapitalize="characters" autocomplete="off" placeholder="00.000.000/0000-00" value="${esc(l.cnpj || "")}"><span class="err"></span></div>
+        </div>
+        <div class="row">
+          <div class="field"><label for="estado">Estado</label>
+            <select id="estado" name="estado">
+              <option value="">Selecione o estado</option>
+              ${Object.keys(ESTADOS).map(uf => `<option value="${uf}"${l.estado === uf ? " selected" : ""}>${ESTADOS[uf]}</option>`).join("")}
+            </select><span class="err"></span></div>
+          <div class="field"><label for="cidade">Cidade</label>
+            <select id="cidade" name="cidade" disabled><option value="">Selecione o estado primeiro</option></select><span class="err"></span></div>
         </div>
         <button class="btn" type="submit">Ver meu resultado ${I.arrow}</button>
         <p class="privacy">${I.lock} Seus dados estão protegidos e serão usados apenas para o contato da Só Aço sobre o seu projeto.</p>
@@ -806,6 +833,20 @@ function renderForm() {
 
   const whats = document.getElementById("whats");
   whats.addEventListener("input", () => { whats.value = maskPhone(whats.value); });
+  const cnpj = document.getElementById("cnpj");
+  cnpj.addEventListener("input", () => { cnpj.value = maskCNPJ(cnpj.value); });
+
+  const estado = document.getElementById("estado");
+  const cidade = document.getElementById("cidade");
+  const fillCities = selected => {
+    const list = CIDADES[estado.value] || [];
+    cidade.disabled = !list.length;
+    cidade.innerHTML = list.length
+      ? `<option value="">Selecione a cidade</option>` + list.map(c => `<option${c === selected ? " selected" : ""}>${esc(c)}</option>`).join("")
+      : `<option value="">Selecione o estado primeiro</option>`;
+  };
+  estado.addEventListener("change", () => fillCities());
+  fillCities(l.cidade);
 
   document.getElementById("leadForm").addEventListener("submit", e => {
     e.preventDefault();
@@ -814,13 +855,17 @@ function renderForm() {
       nome: f.nome.value.trim(),
       whats: f.whats.value.trim(),
       empresa: f.empresa.value.trim(),
-      cidade: f.cidade.value.trim()
+      cnpj: f.cnpj.value.trim(),
+      estado: f.estado.value,
+      cidade: f.cidade.value
     };
     const errors = {
       nome: data.nome.length < 3 ? "Informe seu nome." : "",
       whats: data.whats.replace(/\D/g, "").length < 10 ? "Informe um WhatsApp válido com DDD." : "",
       empresa: data.empresa.length < 2 ? "Informe o nome da empresa." : "",
-      cidade: data.cidade.length < 2 ? "Informe sua cidade." : ""
+      cnpj: !validCNPJ(data.cnpj) ? "Informe um CNPJ válido." : "",
+      estado: !data.estado ? "Selecione o estado." : "",
+      cidade: !data.cidade ? "Selecione a cidade." : ""
     };
     let first = null;
     Object.entries(errors).forEach(([k, msg]) => {
@@ -841,6 +886,32 @@ function maskPhone(v) {
   if (d.length <= 6) return `(${d.slice(0, 2)}) ${d.slice(2)}`;
   if (d.length <= 10) return `(${d.slice(0, 2)}) ${d.slice(2, 6)}-${d.slice(6)}`;
   return `(${d.slice(0, 2)}) ${d.slice(2, 7)}-${d.slice(7)}`;
+}
+
+// Aceita o CNPJ numérico e o novo alfanumérico (Receita Federal, a partir de jul/2026)
+function maskCNPJ(v) {
+  const c = v.toUpperCase().replace(/[^0-9A-Z]/g, "").slice(0, 14);
+  let o = c.slice(0, 2);
+  if (c.length > 2) o += "." + c.slice(2, 5);
+  if (c.length > 5) o += "." + c.slice(5, 8);
+  if (c.length > 8) o += "/" + c.slice(8, 12);
+  if (c.length > 12) o += "-" + c.slice(12);
+  return o;
+}
+
+function validCNPJ(v) {
+  const c = v.toUpperCase().replace(/[^0-9A-Z]/g, "");
+  if (!/^[0-9A-Z]{12}\d{2}$/.test(c) || /^(\d)\1{13}$/.test(c)) return false;
+  const dv = len => {
+    let sum = 0, w = len - 7;
+    for (let i = 0; i < len; i++) {
+      sum += (c.charCodeAt(i) - 48) * w--;
+      if (w < 2) w = 9;
+    }
+    const r = sum % 11;
+    return r < 2 ? 0 : 11 - r;
+  };
+  return dv(12) === Number(c[12]) && dv(13) === Number(c[13]);
 }
 
 function showLoading() {
@@ -902,7 +973,8 @@ function renderResult() {
   const summary = answerSummary();
 
   const msg = [
-    `Olá, Só Aço! Sou ${state.lead.nome}, da ${state.lead.empresa} (${state.lead.cidade}).`,
+    `Olá, Só Aço! Sou ${state.lead.nome}, da ${state.lead.empresa} (${state.lead.cidade}/${state.lead.estado}).`,
+    `CNPJ: ${state.lead.cnpj}`,
     `Fiz o quiz e a solução recomendada foi: *${s.name}*.`,
     "",
     ...summary.map(x => `• ${x.label}: ${x.value}`),
