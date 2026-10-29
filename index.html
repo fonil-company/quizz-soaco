@@ -520,8 +520,10 @@
 const CONFIG = {
   // Número de WhatsApp da Só Aço (DDI + DDD + número, só dígitos)
   whatsapp: "5500000000000",
-  // Opcional: URL de webhook (CRM, Make, Zapier, n8n...) que recebe o lead em JSON via POST
-  webhook: ""
+  // Webhook de leads do CRM Fonil (recebe o lead em JSON via POST)
+  webhook: "https://crm.fonilgroup.com.br/api/webhooks/leads/cmvjv1e85004prkvni2juj0uk",
+  // Origem do lead registrada no CRM
+  source: "Quiz Só Aço"
 };
 
 /* =========================================================
@@ -713,11 +715,26 @@ const CIDADES = {"PI":["Acauã","Agricolândia","Água Branca","Alagoinha do Pia
 const app = document.getElementById("app");
 const topBar = document.getElementById("top");
 const bar = document.getElementById("bar");
-const state = { step: -1, answers: [], other: {}, lead: null };
+const state = { step: -1, answers: [], other: {}, lead: null, tracking: captureTracking() };
 let advanceTimer = null;
 
 document.getElementById("year").textContent = new Date().getFullYear();
 bar.innerHTML = QUESTIONS.map(() => "<span></span>").join("");
+
+// UTMs e IDs de clique da URL de chegada; guardados na sessão para não se perderem
+function captureTracking() {
+  const KEYS = ["utm_source", "utm_medium", "utm_campaign", "utm_term", "utm_content", "utm_id", "gclid", "gbraid", "wbraid", "fbclid", "ttclid", "msclkid"];
+  let saved = {};
+  try { saved = JSON.parse(sessionStorage.getItem("soaco_tracking")) || {}; } catch (e) {}
+  const params = new URLSearchParams(location.search);
+  const fromUrl = {};
+  KEYS.forEach(k => { const v = params.get(k); if (v) fromUrl[k] = v.trim(); });
+  const tracking = Object.keys(fromUrl).length
+    ? { ...fromUrl, landing_page: location.href, referrer: document.referrer || "" }
+    : { landing_page: location.href, referrer: document.referrer || "", ...saved };
+  try { sessionStorage.setItem("soaco_tracking", JSON.stringify(tracking)); } catch (e) {}
+  return tracking;
+}
 
 function esc(s) {
   return String(s).replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
@@ -976,23 +993,83 @@ function leadTemperature() {
   return ["Quente", "Morno", "Morno", "Frio"][state.answers[QUESTIONS.length - 1]];
 }
 
-function sendLead(result) {
-  if (!CONFIG.webhook) return;
-  const payload = {
-    ...state.lead,
-    solucao: SOLUTIONS[result.main].name,
-    solucao_alternativa: SOLUTIONS[result.second].name,
-    temperatura: leadTemperature(),
-    respostas: Object.fromEntries(answerSummary().map(r => [r.label, r.value])),
-    pagina: location.href,
-    data: new Date().toISOString()
+function buildLeadPayload(result) {
+  const lead = state.lead;
+  const t = state.tracking;
+  const respostas = answerSummary();
+  const solucao = SOLUTIONS[result.main].name;
+  const alternativa = SOLUTIONS[result.second].name;
+  const temperatura = leadTemperature();
+  const notes = [
+    `Lead do ${CONFIG.source}`,
+    `Empresa: ${lead.empresa}`,
+    `CNPJ: ${lead.cnpj}`,
+    `Cidade/UF: ${lead.cidade}/${lead.estado}`,
+    "",
+    "Respostas do quiz:",
+    ...respostas.map(r => `• ${r.label}: ${r.value}`),
+    "",
+    `Solução recomendada: ${solucao}`,
+    `Solução alternativa: ${alternativa}`,
+    `Temperatura: ${temperatura}`,
+    "",
+    "Origem:",
+    ...["utm_source", "utm_medium", "utm_campaign", "utm_term", "utm_content", "utm_id", "gclid", "gbraid", "wbraid", "fbclid", "ttclid", "msclkid"]
+      .filter(k => t[k]).map(k => `• ${k}: ${t[k]}`),
+    `• Página: ${t.landing_page}`,
+    `• Referência: ${t.referrer || "acesso direto"}`
+  ].join("\n");
+
+  return {
+    // Campos padrão do webhook
+    phone: lead.whats.replace(/\D/g, ""),
+    name: lead.nome,
+    document: lead.cnpj.toUpperCase().replace(/[^0-9A-Z]/g, ""),
+    city: lead.cidade,
+    state: lead.estado,
+    // Dados complementares do quiz
+    company: lead.empresa,
+    source: CONFIG.source,
+    solucao,
+    solucao_alternativa: alternativa,
+    temperatura,
+    respostas: Object.fromEntries(respostas.map(r => [r.label, r.value])),
+    ...Object.fromEntries(QUESTIONS.map((q, i) => [q.key, respostas[i].value])),
+    // Rastreamento
+    utm_source: t.utm_source || "",
+    utm_medium: t.utm_medium || "",
+    utm_campaign: t.utm_campaign || "",
+    utm_term: t.utm_term || "",
+    utm_content: t.utm_content || "",
+    utm_id: t.utm_id || "",
+    gclid: t.gclid || "",
+    gbraid: t.gbraid || "",
+    wbraid: t.wbraid || "",
+    fbclid: t.fbclid || "",
+    ttclid: t.ttclid || "",
+    msclkid: t.msclkid || "",
+    utms: Object.fromEntries(Object.entries(t).filter(([k]) => k !== "landing_page" && k !== "referrer")),
+    landing_page: t.landing_page,
+    referrer: t.referrer,
+    notes,
+    created_at: new Date().toISOString()
   };
-  fetch(CONFIG.webhook, {
+}
+
+// O CRM não envia cabeçalhos CORS: o POST vai como "simple request" (text/plain + no-cors),
+// que o navegador entrega sem preflight; o CRM lê o corpo como JSON mesmo assim.
+function sendLead(result) {
+  if (!CONFIG.webhook || state.leadSent) return;
+  state.leadSent = true;
+  const body = JSON.stringify(buildLeadPayload(result));
+  const post = () => fetch(CONFIG.webhook, {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(payload),
+    mode: "no-cors",
+    headers: { "Content-Type": "text/plain;charset=UTF-8" },
+    body,
     keepalive: true
-  }).catch(() => {});
+  });
+  post().catch(() => setTimeout(() => post().catch(() => {}), 1500));
 }
 
 function renderResult() {
@@ -1038,6 +1115,7 @@ function renderResult() {
   document.getElementById("restart").onclick = () => {
     state.answers = [];
     state.other = {};
+    state.leadSent = false;
     go(-1);
   };
 }
