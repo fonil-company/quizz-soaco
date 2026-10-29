@@ -1,0 +1,944 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Quiz Só Aço | Descubra a estrutura ideal para o seu armazém</title>
+<meta name="description" content="Responda 6 perguntas rápidas e descubra qual estrutura em aço é a ideal para o seu armazém, galpão ou depósito.">
+<meta name="theme-color" content="#051D59">
+<link rel="icon" href="assets/logo-so-aco.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Michroma&family=Montserrat:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --navy: #051D59;
+    --navy-deep: #031B4D;
+    --navy-mid: #061D61;
+    --gold: #F8AC1A;
+    --gold-hover: #FFBC3A;
+    --white: #FFFFFF;
+    --steel: #A7AFBA;
+    --light: #F3F5F8;
+    --line: rgba(167, 175, 186, .18);
+    --card: rgba(255, 255, 255, .04);
+    --card-hover: rgba(248, 172, 26, .08);
+    --radius: 10px;
+    --font-title: "Michroma", "Eurostile Extended", "Arial Black", sans-serif;
+    --font-body: "Montserrat", "Inter", system-ui, -apple-system, "Segoe UI", sans-serif;
+  }
+
+  * { box-sizing: border-box; }
+  html, body { margin: 0; min-height: 100%; }
+  body {
+    min-height: 100vh;
+    min-height: 100dvh;
+    font-family: var(--font-body);
+    color: var(--white);
+    background:
+      radial-gradient(1200px 600px at 85% -10%, rgba(6, 29, 140, .55), transparent 60%),
+      linear-gradient(160deg, var(--navy-deep) 0%, var(--navy) 55%, var(--navy-mid) 100%);
+    background-attachment: fixed;
+    -webkit-font-smoothing: antialiased;
+    overflow-x: hidden;
+  }
+  /* Malha modular, como uma estrutura de porta-pallet vista de frente */
+  body::before {
+    content: "";
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    background-image:
+      linear-gradient(var(--line) 1px, transparent 1px),
+      linear-gradient(90deg, var(--line) 1px, transparent 1px);
+    background-size: 120px 80px;
+    mask-image: radial-gradient(ellipse at 50% 40%, rgba(0,0,0,.35), transparent 75%);
+    -webkit-mask-image: radial-gradient(ellipse at 50% 40%, rgba(0,0,0,.35), transparent 75%);
+  }
+  [hidden] { display: none !important; }
+  img { max-width: 100%; display: block; }
+  button { font: inherit; color: inherit; cursor: pointer; }
+
+  .wrap {
+    position: relative;
+    max-width: 760px;
+    margin: 0 auto;
+    padding: max(20px, env(safe-area-inset-top)) 20px max(32px, env(safe-area-inset-bottom));
+    min-height: 100vh;
+    min-height: 100dvh;
+    display: flex;
+    flex-direction: column;
+  }
+
+  /* ---------- Topo ---------- */
+  .top {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding-block: 8px 20px;
+  }
+  .top .badge {
+    width: 52px;
+    height: 52px;
+    border-radius: 10px;
+    overflow: hidden;
+    flex: none;
+    box-shadow: 0 0 0 1px rgba(255,255,255,.08);
+  }
+  .progress {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+  .progress-meta {
+    display: flex;
+    justify-content: space-between;
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: .12em;
+    text-transform: uppercase;
+    color: var(--steel);
+  }
+  .progress-meta b { color: var(--gold); font-weight: 700; }
+  .bar {
+    display: grid;
+    grid-template-columns: repeat(6, 1fr);
+    gap: 4px;
+  }
+  .bar span {
+    height: 6px;
+    border-radius: 2px;
+    background: rgba(255,255,255,.12);
+    transition: background .3s ease;
+  }
+  .bar span.on { background: var(--gold); }
+
+  .btn-back {
+    background: none;
+    border: 0;
+    padding: 8px 0;
+    color: var(--steel);
+    font-size: 14px;
+    font-weight: 600;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    align-self: flex-start;
+  }
+  .btn-back:hover { color: var(--white); }
+
+  /* ---------- Telas ---------- */
+  main { flex: 1; display: flex; flex-direction: column; }
+  .screen {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    animation: enter .45s cubic-bezier(.2,.7,.2,1) both;
+  }
+  @keyframes enter {
+    from { opacity: 0; transform: translateY(14px); }
+    to { opacity: 1; transform: none; }
+  }
+
+  .eyebrow {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: .2em;
+    text-transform: uppercase;
+    color: var(--gold);
+  }
+  .eyebrow::before {
+    content: "";
+    width: 28px;
+    height: 3px;
+    border-radius: 2px;
+    background: var(--gold);
+  }
+
+  h1, h2 {
+    font-family: var(--font-title);
+    font-weight: 400;
+    text-transform: uppercase;
+    line-height: 1.25;
+    letter-spacing: .01em;
+    margin: 0;
+  }
+  h1 { font-size: clamp(24px, 5.4vw, 38px); }
+  h2 { font-size: clamp(19px, 4vw, 26px); }
+  h1 em, h2 em { font-style: normal; color: var(--gold); }
+
+  .lead {
+    font-size: clamp(15px, 2.4vw, 17px);
+    line-height: 1.6;
+    color: rgba(255,255,255,.82);
+    margin: 0;
+  }
+
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    border: 0;
+    border-radius: 8px;
+    background: var(--gold);
+    color: var(--navy);
+    font-weight: 800;
+    font-size: 15px;
+    letter-spacing: .08em;
+    text-transform: uppercase;
+    padding: 18px 28px;
+    min-height: 56px;
+    text-decoration: none;
+    transition: background .2s ease, transform .2s ease, box-shadow .2s ease;
+    box-shadow: 0 10px 30px -10px rgba(248,172,26,.55);
+  }
+  .btn:hover { background: var(--gold-hover); transform: translateY(-1px); }
+  .btn:active { transform: translateY(1px); }
+  .btn:disabled { opacity: .5; cursor: not-allowed; transform: none; }
+  .btn svg { width: 20px; height: 20px; flex: none; }
+
+  /* ---------- Intro ---------- */
+  .intro {
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    gap: 28px;
+    padding-block: 24px;
+  }
+  .intro .logo {
+    width: 128px;
+    height: 128px;
+    border-radius: 18px;
+    overflow: hidden;
+    box-shadow: 0 0 0 1px rgba(255,255,255,.08), 0 24px 60px -20px rgba(0,0,0,.6);
+  }
+  .intro h1 { max-width: 640px; }
+  .intro .lead { max-width: 520px; }
+  .facts {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 10px 22px;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--steel);
+  }
+  .facts span { display: inline-flex; align-items: center; gap: 8px; }
+  .facts svg { width: 16px; height: 16px; color: var(--gold); }
+  .intro .btn { width: min(100%, 360px); }
+  .rack {
+    width: min(100%, 520px);
+    height: auto;
+    opacity: .9;
+  }
+
+  /* ---------- Perguntas ---------- */
+  .question { gap: 22px; padding-top: 8px; }
+  .question .hint { font-size: 14px; color: var(--steel); margin: -10px 0 0; }
+  .options {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 12px;
+  }
+  .option {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    text-align: left;
+    padding: 18px 16px;
+    min-height: 84px;
+    border-radius: var(--radius);
+    background: var(--card);
+    border: 1.5px solid rgba(255,255,255,.12);
+    transition: border-color .2s ease, background .2s ease, transform .2s ease;
+  }
+  .option:hover { border-color: rgba(248,172,26,.6); background: var(--card-hover); }
+  .option.selected { border-color: var(--gold); background: rgba(248,172,26,.14); }
+  .option .ico {
+    width: 46px;
+    height: 46px;
+    flex: none;
+    border-radius: 8px;
+    display: grid;
+    place-items: center;
+    background: rgba(248,172,26,.12);
+    color: var(--gold);
+  }
+  .option .ico svg { width: 26px; height: 26px; }
+  .option .txt { display: flex; flex-direction: column; gap: 3px; }
+  .option .t { font-weight: 700; font-size: 15px; line-height: 1.3; }
+  .option .d { font-size: 13px; color: var(--steel); line-height: 1.4; }
+  .option .check {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    border: 1.5px solid rgba(255,255,255,.25);
+    display: grid;
+    place-items: center;
+    transition: all .2s ease;
+  }
+  .option.selected .check { background: var(--gold); border-color: var(--gold); color: var(--navy); }
+  .option .check svg { width: 12px; height: 12px; opacity: 0; }
+  .option.selected .check svg { opacity: 1; }
+
+  /* ---------- Formulário ---------- */
+  .form-screen { gap: 22px; padding-top: 8px; }
+  form { display: flex; flex-direction: column; gap: 14px; }
+  .field { display: flex; flex-direction: column; gap: 6px; }
+  .field label {
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: .12em;
+    text-transform: uppercase;
+    color: var(--steel);
+  }
+  .field input {
+    font: inherit;
+    font-size: 16px;
+    color: var(--navy);
+    background: var(--white);
+    border: 2px solid transparent;
+    border-radius: 8px;
+    padding: 15px 16px;
+    outline: none;
+    transition: border-color .2s ease, box-shadow .2s ease;
+  }
+  .field input:focus { border-color: var(--gold); box-shadow: 0 0 0 4px rgba(248,172,26,.25); }
+  .field.invalid input { border-color: #FF6B5B; }
+  .field .err { font-size: 12px; color: #FF9A8F; font-weight: 600; min-height: 0; }
+  .row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+  .privacy {
+    display: flex;
+    gap: 10px;
+    align-items: flex-start;
+    font-size: 12px;
+    color: var(--steel);
+    line-height: 1.5;
+  }
+  .privacy svg { width: 16px; height: 16px; flex: none; color: var(--gold); margin-top: 1px; }
+  form .btn { margin-top: 6px; }
+
+  /* ---------- Carregando ---------- */
+  .loading {
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    gap: 24px;
+  }
+  .loader {
+    display: grid;
+    grid-template-columns: repeat(3, 18px);
+    gap: 6px;
+  }
+  .loader span {
+    width: 18px;
+    height: 18px;
+    border-radius: 3px;
+    background: var(--gold);
+    animation: stack 1s ease-in-out infinite;
+  }
+  .loader span:nth-child(2) { animation-delay: .15s; }
+  .loader span:nth-child(3) { animation-delay: .3s; }
+  @keyframes stack {
+    0%, 100% { opacity: .25; transform: translateY(0); }
+    50% { opacity: 1; transform: translateY(-8px); }
+  }
+  .loading p { color: var(--steel); font-weight: 600; margin: 0; }
+
+  /* ---------- Resultado ---------- */
+  .result { gap: 22px; padding-top: 8px; }
+  .result-card {
+    position: relative;
+    border-radius: 14px;
+    overflow: hidden;
+    background: var(--white);
+    color: var(--navy);
+  }
+  .result-head {
+    background: var(--navy-deep);
+    color: var(--white);
+    padding: 26px 24px 22px;
+    border-bottom: 4px solid var(--gold);
+    display: flex;
+    gap: 18px;
+    align-items: center;
+  }
+  .result-head .ico {
+    width: 64px;
+    height: 64px;
+    flex: none;
+    border-radius: 10px;
+    background: var(--gold);
+    color: var(--navy);
+    display: grid;
+    place-items: center;
+  }
+  .result-head .ico svg { width: 38px; height: 38px; }
+  .result-head small {
+    display: block;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: .18em;
+    text-transform: uppercase;
+    color: var(--gold);
+    margin-bottom: 6px;
+  }
+  .result-head h2 { font-size: clamp(17px, 3.6vw, 22px); }
+  .result-body { padding: 22px 24px 26px; display: flex; flex-direction: column; gap: 18px; }
+  .result-body p { margin: 0; font-size: 15px; line-height: 1.6; color: #24345E; }
+  .benefits { list-style: none; margin: 0; padding: 0; display: grid; gap: 10px; }
+  .benefits li {
+    display: flex;
+    gap: 12px;
+    align-items: flex-start;
+    font-size: 14px;
+    font-weight: 600;
+    line-height: 1.45;
+  }
+  .benefits li::before {
+    content: "";
+    width: 10px;
+    height: 10px;
+    margin-top: 5px;
+    flex: none;
+    border-radius: 2px;
+    background: var(--gold);
+  }
+  .summary {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px;
+  }
+  .summary div {
+    background: var(--light);
+    border-radius: 8px;
+    padding: 10px 12px;
+  }
+  .summary dt {
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: .14em;
+    text-transform: uppercase;
+    color: #6A7487;
+  }
+  .summary dd { margin: 3px 0 0; font-size: 13px; font-weight: 700; }
+  .also {
+    font-size: 13px;
+    color: var(--steel);
+    text-align: center;
+    margin: 0;
+  }
+  .also b { color: var(--white); }
+  .result .btn { width: 100%; }
+  .restart {
+    align-self: center;
+    background: none;
+    border: 0;
+    color: var(--steel);
+    font-size: 13px;
+    font-weight: 600;
+    text-decoration: underline;
+    text-underline-offset: 3px;
+    padding: 6px;
+  }
+  .restart:hover { color: var(--white); }
+
+  footer {
+    text-align: center;
+    font-size: 12px;
+    color: rgba(167,175,186,.7);
+    padding-top: 28px;
+    letter-spacing: .04em;
+  }
+
+  @media (max-width: 560px) {
+    .options { grid-template-columns: 1fr; }
+    .option { min-height: 72px; padding: 14px; }
+    .row { grid-template-columns: 1fr; }
+    .summary { grid-template-columns: 1fr; }
+    .result-head { padding: 22px 18px 18px; }
+    .result-body { padding: 20px 18px 22px; }
+    .top .badge { width: 44px; height: 44px; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after { animation: none !important; transition: none !important; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="top" id="top" hidden>
+    <div class="badge"><img src="assets/logo-so-aco.png" alt="Só Aço"></div>
+    <div class="progress">
+      <div class="progress-meta"><span id="stepLabel">Pergunta <b>1</b> de 6</span><span id="stepPct">0%</span></div>
+      <div class="bar" id="bar"></div>
+    </div>
+  </header>
+
+  <main id="app"></main>
+
+  <footer>© <span id="year"></span> Só Aço · Soluções em aço para armazenagem</footer>
+</div>
+
+<script>
+/* =========================================================
+   CONFIGURAÇÃO
+   ========================================================= */
+const CONFIG = {
+  // Número de WhatsApp da Só Aço (DDI + DDD + número, só dígitos)
+  whatsapp: "5500000000000",
+  // Opcional: URL de webhook (CRM, Make, Zapier, n8n...) que recebe o lead em JSON via POST
+  webhook: ""
+};
+
+/* =========================================================
+   ÍCONES (traço geométrico, cor herdada)
+   ========================================================= */
+const I = {
+  factory: '<svg viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linejoin="round" stroke-linecap="round"><path d="M3 28V14l7 4v-4l7 4v-4l7 4V5h5v23z"/><path d="M8 23h3M15 23h3M22 23h3"/></svg>',
+  truck: '<svg viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linejoin="round" stroke-linecap="round"><path d="M2 8h17v15H2zM19 13h6l5 5v5H19z"/><circle cx="8" cy="25" r="2.5"/><circle cx="24" cy="25" r="2.5"/></svg>',
+  store: '<svg viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linejoin="round" stroke-linecap="round"><path d="M4 12l3-7h18l3 7M4 12h24v16H4zM4 12c0 2 2 3.5 4 3.5s4-1.5 4-3.5c0 2 2 3.5 4 3.5s4-1.5 4-3.5c0 2 2 3.5 4 3.5s4-1.5 4-3.5"/><path d="M13 28v-7h6v7"/></svg>',
+  agro: '<svg viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linejoin="round" stroke-linecap="round"><path d="M16 29V12M16 18c-6 0-9-4-9-9 6 0 9 4 9 9zM16 22c5 0 8-3 8-8-5 0-8 3-8 8z"/><path d="M6 29h20"/></svg>',
+  grid: '<svg viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linejoin="round" stroke-linecap="round"><rect x="4" y="4" width="10" height="10" rx="2"/><rect x="18" y="4" width="10" height="10" rx="2"/><rect x="4" y="18" width="10" height="10" rx="2"/><rect x="18" y="18" width="10" height="10" rx="2"/></svg>',
+  pallet: '<svg viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linejoin="round" stroke-linecap="round"><rect x="6" y="5" width="20" height="16" rx="1.5"/><path d="M6 13h20M16 5v16M3 21h26v3H3zM6 24v4M16 24v4M26 24v4"/></svg>',
+  boxes: '<svg viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linejoin="round" stroke-linecap="round"><rect x="4" y="15" width="11" height="13" rx="1.5"/><rect x="17" y="15" width="11" height="13" rx="1.5"/><rect x="10" y="3" width="12" height="12" rx="1.5"/><path d="M14 3v4h4V3M8 15v4h3v-4M21 15v4h3v-4"/></svg>',
+  bars: '<svg viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linejoin="round" stroke-linecap="round"><path d="M5 4v24M5 9h22M5 17h22M5 25h22"/><path d="M11 6.5h14M11 14.5h14M11 22.5h14" opacity=".55"/></svg>',
+  tools: '<svg viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linejoin="round" stroke-linecap="round"><rect x="4" y="4" width="24" height="24" rx="2"/><path d="M4 12h24M4 20h24M12 12v16M20 12v16"/></svg>',
+  w1: '<svg viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linejoin="round" stroke-linecap="round"><path d="M4 26h24"/><rect x="11" y="18" width="10" height="8" rx="1"/></svg>',
+  w2: '<svg viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linejoin="round" stroke-linecap="round"><path d="M4 26h24"/><rect x="11" y="18" width="10" height="8" rx="1"/><rect x="11" y="10" width="10" height="8" rx="1"/></svg>',
+  w3: '<svg viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linejoin="round" stroke-linecap="round"><path d="M4 26h24"/><rect x="6" y="18" width="10" height="8" rx="1"/><rect x="16" y="18" width="10" height="8" rx="1"/><rect x="11" y="10" width="10" height="8" rx="1"/></svg>',
+  w4: '<svg viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linejoin="round" stroke-linecap="round"><path d="M4 26h24"/><rect x="6" y="18" width="10" height="8" rx="1"/><rect x="16" y="18" width="10" height="8" rx="1"/><rect x="6" y="10" width="10" height="8" rx="1"/><rect x="16" y="10" width="10" height="8" rx="1"/><path d="M11 6h10"/></svg>',
+  space: '<svg viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linejoin="round" stroke-linecap="round"><path d="M4 4h24v24H4z"/><path d="M10 16h12M16 10v12M10 16l3-3M10 16l3 3M22 16l-3-3M22 16l-3 3"/></svg>',
+  mess: '<svg viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linejoin="round" stroke-linecap="round"><rect x="4" y="16" width="10" height="10" rx="1.5" transform="rotate(-12 9 21)"/><rect x="17" y="17" width="10" height="10" rx="1.5" transform="rotate(10 22 22)"/><rect x="10" y="5" width="10" height="10" rx="1.5" transform="rotate(20 15 10)"/></svg>',
+  speed: '<svg viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linejoin="round" stroke-linecap="round"><path d="M5 22a11 11 0 1 1 22 0"/><path d="M16 22l6-7"/><circle cx="16" cy="22" r="2"/><path d="M3 27h26"/></svg>',
+  shield: '<svg viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linejoin="round" stroke-linecap="round"><path d="M16 3l11 4v8c0 7-5 12-11 14C10 27 5 22 5 15V7z"/><path d="M11 16l4 4 7-8"/></svg>',
+  h1: '<svg viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linejoin="round" stroke-linecap="round"><path d="M3 28h26M8 28V20l8-4 8 4v8"/><path d="M27 16v12M25 18l2-2 2 2" /></svg>',
+  h2: '<svg viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linejoin="round" stroke-linecap="round"><path d="M3 28h26M7 28V15l9-5 9 5v13"/><path d="M28 9v19M26 11l2-2 2 2"/></svg>',
+  h3: '<svg viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linejoin="round" stroke-linecap="round"><path d="M3 28h26M6 28V11l9-6 9 6v17"/><path d="M28 4v24M26 6l2-2 2 2"/></svg>',
+  clockNow: '<svg viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linejoin="round" stroke-linecap="round"><path d="M17 3L7 18h8l-2 11 12-16h-8z"/></svg>',
+  cal: '<svg viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linejoin="round" stroke-linecap="round"><rect x="4" y="6" width="24" height="22" rx="2"/><path d="M4 13h24M10 3v6M22 3v6"/><path d="M10 19h4v4h-4z"/></svg>',
+  cal2: '<svg viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linejoin="round" stroke-linecap="round"><rect x="4" y="6" width="24" height="22" rx="2"/><path d="M4 13h24M10 3v6M22 3v6M10 19h12M10 24h7"/></svg>',
+  search: '<svg viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linejoin="round" stroke-linecap="round"><circle cx="14" cy="14" r="9"/><path d="M21 21l7 7"/></svg>',
+  mezz: '<svg viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linejoin="round" stroke-linecap="round"><path d="M3 15h26M5 15v13M27 15v13M16 15v13"/><path d="M3 15v-3h26v3"/><path d="M20 12l3-7h2l-3 7"/><rect x="7" y="7" width="7" height="5" rx="1"/></svg>',
+  shelf: '<svg viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linejoin="round" stroke-linecap="round"><path d="M6 3v26M26 3v26M6 10h20M6 18h20M6 26h20"/><rect x="9" y="5" width="5" height="5"/><rect x="17" y="13" width="6" height="5"/><rect x="10" y="21" width="7" height="5"/></svg>',
+  rack: '<svg viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linejoin="round" stroke-linecap="round"><path d="M4 3v26M16 3v26M28 3v26M4 11h24M4 20h24M4 29h24"/><rect x="6.5" y="13" width="7" height="7"/><rect x="18.5" y="4" width="7" height="7"/><rect x="18.5" y="22" width="7" height="7"/></svg>',
+  drive: '<svg viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linejoin="round" stroke-linecap="round"><path d="M3 4v25M29 4v25M3 4h26"/><rect x="7" y="8" width="6" height="6"/><rect x="13" y="8" width="6" height="6"/><rect x="19" y="8" width="6" height="6"/><rect x="7" y="18" width="6" height="6"/><rect x="13" y="18" width="6" height="6"/><rect x="19" y="18" width="6" height="6"/></svg>',
+  cant: '<svg viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linejoin="round" stroke-linecap="round"><path d="M10 3v26M6 29h8M10 9h17M10 17h17M10 25h17"/><path d="M14 7h12M14 15h12M14 23h12" opacity=".5"/></svg>',
+  check: '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3 8.5l3 3 7-7"/></svg>',
+  arrow: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>',
+  back: '<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M11 6l-6 6 6 6"/></svg>',
+  clock: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>',
+  list: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M9 6h11M9 12h11M9 18h11M4 6h.01M4 12h.01M4 18h.01"/></svg>',
+  gift: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l2.5 5.5L20 9l-4 4 1 6-5-3-5 3 1-6-4-4 5.5-.5z"/></svg>',
+  lock: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg>',
+  wa: '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2a10 10 0 0 0-8.6 15.1L2 22l5-1.3A10 10 0 1 0 12 2zm0 18.2c-1.5 0-3-.4-4.3-1.2l-.3-.2-3 .8.8-2.9-.2-.3A8.2 8.2 0 1 1 12 20.2zm4.5-6.1c-.2-.1-1.5-.7-1.7-.8-.2-.1-.4-.1-.6.1l-.8 1c-.1.2-.3.2-.5.1a6.7 6.7 0 0 1-3.3-2.9c-.2-.4.2-.4.7-1.3.1-.2 0-.3 0-.4l-.8-1.8c-.2-.5-.4-.4-.6-.4h-.5c-.2 0-.4.1-.7.3-.2.3-.9.9-.9 2.2s.9 2.5 1 2.7c.1.2 1.8 2.8 4.4 3.9 1.6.7 2.3.8 3.1.6.5-.1 1.5-.6 1.7-1.2.2-.6.2-1.1.2-1.2-.1-.1-.3-.2-.5-.3z"/></svg>'
+};
+
+/* =========================================================
+   PERGUNTAS
+   Cada opção soma pontos para as soluções:
+   SEL = Porta-pallet seletivo · DRV = Drive-in · CAN = Cantilever
+   MEZ = Mezanino metálico · EST = Estante de aço
+   ========================================================= */
+const QUESTIONS = [
+  {
+    key: "segmento",
+    label: "Segmento",
+    title: "Qual é o <em>segmento</em> da sua empresa?",
+    options: [
+      { t: "Indústria", d: "Fábrica, produção, metalurgia", icon: "factory", p: { SEL: 2, CAN: 1, MEZ: 1 } },
+      { t: "Distribuição e logística", d: "CD, transportadora, e-commerce", icon: "truck", p: { SEL: 2, DRV: 2 } },
+      { t: "Varejo e atacado", d: "Loja, atacarejo, depósito", icon: "store", p: { EST: 2, MEZ: 1, SEL: 1 } },
+      { t: "Agronegócio e alimentos", d: "Insumos, frigorífico, bebidas", icon: "agro", p: { DRV: 2, SEL: 1 } }
+    ]
+  },
+  {
+    key: "carga",
+    label: "Tipo de carga",
+    title: "O que você precisa <em>armazenar</em>?",
+    options: [
+      { t: "Cargas paletizadas", d: "Pallets movimentados por empilhadeira", icon: "pallet", p: { SEL: 4, DRV: 3 } },
+      { t: "Caixas e volumes médios", d: "Separação manual, picking", icon: "boxes", p: { EST: 3, MEZ: 2, SEL: 1 } },
+      { t: "Itens longos", d: "Tubos, perfis, barras, chapas", icon: "bars", p: { CAN: 8 } },
+      { t: "Peças pequenas e ferramentas", d: "Componentes, almoxarifado", icon: "tools", p: { EST: 5, MEZ: 1 } }
+    ]
+  },
+  {
+    key: "peso",
+    label: "Peso por nível",
+    title: "Qual o <em>peso médio</em> por nível ou posição?",
+    options: [
+      { t: "Até 300 kg", d: "Carga leve", icon: "w1", p: { EST: 3, MEZ: 1 } },
+      { t: "300 a 1.000 kg", d: "Carga média", icon: "w2", p: { SEL: 2, EST: 1, CAN: 1, MEZ: 1 } },
+      { t: "1.000 a 2.000 kg", d: "Carga pesada", icon: "w3", p: { SEL: 3, DRV: 2, CAN: 1 } },
+      { t: "Acima de 2.000 kg", d: "Carga extra pesada", icon: "w4", p: { DRV: 3, SEL: 2, CAN: 2 } }
+    ]
+  },
+  {
+    key: "desafio",
+    label: "Principal desafio",
+    title: "Qual o seu <em>maior desafio</em> hoje?",
+    options: [
+      { t: "Falta de espaço", d: "O galpão já não comporta o estoque", icon: "space", p: { DRV: 3, MEZ: 3 } },
+      { t: "Desorganização", d: "Difícil encontrar e controlar itens", icon: "mess", p: { EST: 2, SEL: 2 } },
+      { t: "Agilidade na separação", d: "Pedidos saindo devagar", icon: "speed", p: { SEL: 3, EST: 2 } },
+      { t: "Segurança da operação", d: "Estruturas antigas ou improvisadas", icon: "shield", p: { SEL: 1, DRV: 1, CAN: 1, MEZ: 1, EST: 1 } }
+    ]
+  },
+  {
+    key: "pe_direito",
+    label: "Pé-direito",
+    title: "Qual a <em>altura</em> (pé-direito) do seu galpão?",
+    options: [
+      { t: "Até 4 metros", d: "Ambiente baixo", icon: "w1", p: { EST: 3 } },
+      { t: "De 4 a 8 metros", d: "Altura intermediária", icon: "h1", p: { MEZ: 3, SEL: 1, EST: 1 } },
+      { t: "De 8 a 12 metros", d: "Galpão alto", icon: "h2", p: { SEL: 2, DRV: 2, MEZ: 1 } },
+      { t: "Acima de 12 metros", d: "Grande verticalização", icon: "h3", p: { SEL: 2, DRV: 3 } }
+    ]
+  },
+  {
+    key: "prazo",
+    label: "Prazo",
+    title: "Quando você pretende <em>implementar</em>?",
+    options: [
+      { t: "O quanto antes", d: "Preciso resolver já", icon: "clockNow", p: {} },
+      { t: "Nos próximos 3 meses", d: "Já estou planejando", icon: "cal", p: {} },
+      { t: "Entre 3 e 6 meses", d: "Projeto para o semestre", icon: "cal2", p: {} },
+      { t: "Ainda estou pesquisando", d: "Quero entender as opções", icon: "search", p: {} }
+    ]
+  }
+];
+
+/* =========================================================
+   SOLUÇÕES
+   ========================================================= */
+const SOLUTIONS = {
+  SEL: {
+    name: "Porta-Pallet Seletivo",
+    icon: "rack",
+    text: "A estrutura mais versátil para cargas paletizadas: acesso direto a cada pallet, montagem modular e excelente aproveitamento vertical do seu galpão.",
+    benefits: [
+      "Acesso a 100% das posições, sem remanejar pallets",
+      "Longarinas reguláveis que acompanham o crescimento do estoque",
+      "Ideal para operações com grande variedade de itens (SKUs)"
+    ]
+  },
+  DRV: {
+    name: "Porta-Pallet Drive-In",
+    icon: "drive",
+    text: "Armazenagem de alta densidade: a empilhadeira entra na estrutura e você guarda muito mais pallets na mesma área, eliminando corredores.",
+    benefits: [
+      "Até 75% mais posições de pallet na mesma área",
+      "Perfeito para grandes volumes de um mesmo produto",
+      "Ótimo para câmaras frias e espaços de alto custo por m²"
+    ]
+  },
+  CAN: {
+    name: "Cantilever",
+    icon: "cant",
+    text: "Estrutura com braços em balanço, sem colunas frontais, feita para guardar itens longos e volumosos com segurança e facilidade de carga.",
+    benefits: [
+      "Armazena tubos, perfis, barras e chapas de qualquer comprimento",
+      "Carga lateral livre, sem obstáculos frontais",
+      "Braços reguláveis para diferentes alturas e pesos"
+    ]
+  },
+  MEZ: {
+    name: "Mezanino Metálico",
+    icon: "mezz",
+    text: "Crie um novo piso dentro do seu galpão e dobre a área útil sem obra civil. Pode virar estoque, área de separação ou escritório.",
+    benefits: [
+      "Dobra a área útil aproveitando o pé-direito existente",
+      "Montagem rápida e sem quebra-quebra",
+      "Integra com estantes, porta-pallets e escadas"
+    ]
+  },
+  EST: {
+    name: "Estante de Aço",
+    icon: "shelf",
+    text: "Organização prática para caixas, peças e ferramentas. Estrutura robusta, de fácil montagem e com prateleiras reguláveis.",
+    benefits: [
+      "Prateleiras reguláveis para cada tipo de item",
+      "Separação manual mais rápida e organizada",
+      "Ótimo custo-benefício para almoxarifados e estoques leves"
+    ]
+  }
+};
+
+/* =========================================================
+   ESTADO E RENDERIZAÇÃO
+   ========================================================= */
+const app = document.getElementById("app");
+const topBar = document.getElementById("top");
+const bar = document.getElementById("bar");
+const state = { step: -1, answers: [], lead: null };
+let advanceTimer = null;
+
+document.getElementById("year").textContent = new Date().getFullYear();
+bar.innerHTML = QUESTIONS.map(() => "<span></span>").join("");
+
+function esc(s) {
+  return String(s).replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+}
+
+function setProgress(i) {
+  const total = QUESTIONS.length;
+  const done = Math.min(i, total);
+  [...bar.children].forEach((s, n) => s.classList.toggle("on", n < done + (i < total ? 1 : 0)));
+  document.getElementById("stepLabel").innerHTML = i < total
+    ? `Pergunta <b>${i + 1}</b> de ${total}`
+    : `<b>Quase lá</b>`;
+  document.getElementById("stepPct").textContent = Math.round((done / total) * 100) + "%";
+}
+
+function go(step) {
+  clearTimeout(advanceTimer);
+  state.step = step;
+  window.scrollTo({ top: 0, behavior: "smooth" });
+  if (step < 0) return renderIntro();
+  if (step < QUESTIONS.length) return renderQuestion(step);
+  if (step === QUESTIONS.length) return renderForm();
+  renderResult();
+}
+
+function renderIntro() {
+  topBar.hidden = true;
+  app.innerHTML = `
+    <section class="screen intro">
+      <div class="logo"><img src="assets/logo-so-aco.png" alt="Só Aço"></div>
+      <span class="eyebrow">Diagnóstico gratuito</span>
+      <h1>Descubra a <em>estrutura em aço</em> ideal para o seu armazém</h1>
+      <p class="lead">Responda 6 perguntas rápidas e receba a recomendação da solução que mais combina com a sua operação, direto de um especialista Só Aço.</p>
+      <div class="facts">
+        <span>${I.list} 6 perguntas</span>
+        <span>${I.clock} Menos de 1 minuto</span>
+        <span>${I.gift} Resultado na hora</span>
+      </div>
+      <button class="btn" id="start">Começar agora ${I.arrow}</button>
+      <svg class="rack" viewBox="0 0 520 120" fill="none" aria-hidden="true">
+        <g stroke="#A7AFBA" stroke-opacity=".35" stroke-width="3" stroke-linecap="round">
+          <path d="M20 10v104M180 10v104M340 10v104M500 10v104"/>
+        </g>
+        <g stroke="#F8AC1A" stroke-width="4" stroke-linecap="round">
+          <path d="M20 46h480M20 84h480"/>
+        </g>
+        <g fill="#FFFFFF" fill-opacity=".1" stroke="#FFFFFF" stroke-opacity=".35" stroke-width="2">
+          <rect x="36" y="14" width="58" height="30" rx="2"/>
+          <rect x="104" y="18" width="60" height="26" rx="2"/>
+          <rect x="196" y="12" width="64" height="32" rx="2"/>
+          <rect x="356" y="16" width="62" height="28" rx="2"/>
+          <rect x="426" y="20" width="58" height="24" rx="2"/>
+          <rect x="36" y="54" width="62" height="28" rx="2"/>
+          <rect x="196" y="56" width="58" height="26" rx="2"/>
+          <rect x="264" y="52" width="60" height="30" rx="2"/>
+          <rect x="356" y="54" width="60" height="28" rx="2"/>
+          <rect x="104" y="92" width="58" height="22" rx="2"/>
+          <rect x="270" y="90" width="54" height="24" rx="2"/>
+          <rect x="426" y="92" width="58" height="22" rx="2"/>
+        </g>
+      </svg>
+    </section>`;
+  document.getElementById("start").onclick = () => go(0);
+}
+
+function renderQuestion(i) {
+  const q = QUESTIONS[i];
+  topBar.hidden = false;
+  setProgress(i);
+  app.innerHTML = `
+    <section class="screen question">
+      <button class="btn-back" id="back">${I.back} Voltar</button>
+      <span class="eyebrow">${esc(q.label)}</span>
+      <h2>${q.title}</h2>
+      <div class="options" role="radiogroup">
+        ${q.options.map((o, n) => `
+          <button class="option${state.answers[i] === n ? " selected" : ""}" role="radio" aria-checked="${state.answers[i] === n}" data-n="${n}">
+            <span class="ico">${I[o.icon]}</span>
+            <span class="txt"><span class="t">${esc(o.t)}</span><span class="d">${esc(o.d)}</span></span>
+            <span class="check">${I.check}</span>
+          </button>`).join("")}
+      </div>
+    </section>`;
+  document.getElementById("back").onclick = () => go(i - 1);
+  app.querySelectorAll(".option").forEach(btn => {
+    btn.onclick = () => {
+      app.querySelectorAll(".option").forEach(b => { b.classList.remove("selected"); b.setAttribute("aria-checked", "false"); });
+      btn.classList.add("selected");
+      btn.setAttribute("aria-checked", "true");
+      state.answers[i] = Number(btn.dataset.n);
+      clearTimeout(advanceTimer);
+      advanceTimer = setTimeout(() => go(i + 1), 320);
+    };
+  });
+}
+
+function renderForm() {
+  topBar.hidden = false;
+  setProgress(QUESTIONS.length);
+  const l = state.lead || {};
+  app.innerHTML = `
+    <section class="screen form-screen">
+      <button class="btn-back" id="back">${I.back} Voltar</button>
+      <span class="eyebrow">Seu resultado está pronto</span>
+      <h2>Para onde enviamos a sua <em>recomendação</em>?</h2>
+      <p class="lead">Preencha seus dados para ver o resultado. Um especialista Só Aço pode entrar em contato para ajudar no seu projeto.</p>
+      <form id="leadForm" novalidate>
+        <div class="field"><label for="nome">Nome</label><input id="nome" name="nome" autocomplete="name" placeholder="Seu nome completo" value="${esc(l.nome || "")}"><span class="err"></span></div>
+        <div class="field"><label for="whats">WhatsApp</label><input id="whats" name="whats" type="tel" inputmode="numeric" autocomplete="tel" placeholder="(00) 00000-0000" value="${esc(l.whats || "")}"><span class="err"></span></div>
+        <div class="row">
+          <div class="field"><label for="empresa">Empresa</label><input id="empresa" name="empresa" autocomplete="organization" placeholder="Nome da empresa" value="${esc(l.empresa || "")}"><span class="err"></span></div>
+          <div class="field"><label for="cidade">Cidade / UF</label><input id="cidade" name="cidade" autocomplete="address-level2" placeholder="Ex.: Campinas / SP" value="${esc(l.cidade || "")}"><span class="err"></span></div>
+        </div>
+        <button class="btn" type="submit">Ver meu resultado ${I.arrow}</button>
+        <p class="privacy">${I.lock} Seus dados estão protegidos e serão usados apenas para o contato da Só Aço sobre o seu projeto.</p>
+      </form>
+    </section>`;
+  document.getElementById("back").onclick = () => go(QUESTIONS.length - 1);
+
+  const whats = document.getElementById("whats");
+  whats.addEventListener("input", () => { whats.value = maskPhone(whats.value); });
+
+  document.getElementById("leadForm").addEventListener("submit", e => {
+    e.preventDefault();
+    const f = e.target;
+    const data = {
+      nome: f.nome.value.trim(),
+      whats: f.whats.value.trim(),
+      empresa: f.empresa.value.trim(),
+      cidade: f.cidade.value.trim()
+    };
+    const errors = {
+      nome: data.nome.length < 3 ? "Informe seu nome." : "",
+      whats: data.whats.replace(/\D/g, "").length < 10 ? "Informe um WhatsApp válido com DDD." : "",
+      empresa: data.empresa.length < 2 ? "Informe o nome da empresa." : "",
+      cidade: data.cidade.length < 2 ? "Informe sua cidade." : ""
+    };
+    let first = null;
+    Object.entries(errors).forEach(([k, msg]) => {
+      const field = f[k].closest(".field");
+      field.classList.toggle("invalid", !!msg);
+      field.querySelector(".err").textContent = msg;
+      if (msg && !first) first = f[k];
+    });
+    if (first) return first.focus();
+    state.lead = data;
+    showLoading();
+  });
+}
+
+function maskPhone(v) {
+  const d = v.replace(/\D/g, "").slice(0, 11);
+  if (d.length <= 2) return d.length ? `(${d}` : "";
+  if (d.length <= 6) return `(${d.slice(0, 2)}) ${d.slice(2)}`;
+  if (d.length <= 10) return `(${d.slice(0, 2)}) ${d.slice(2, 6)}-${d.slice(6)}`;
+  return `(${d.slice(0, 2)}) ${d.slice(2, 7)}-${d.slice(7)}`;
+}
+
+function showLoading() {
+  topBar.hidden = true;
+  app.innerHTML = `
+    <section class="screen loading">
+      <div class="loader"><span></span><span></span><span></span></div>
+      <h2>Analisando sua <em>operação</em></h2>
+      <p>Cruzando carga, peso e espaço disponível…</p>
+    </section>`;
+  const result = computeResult();
+  sendLead(result);
+  setTimeout(() => go(QUESTIONS.length + 1), 1600);
+}
+
+function computeResult() {
+  const score = { SEL: 0, DRV: 0, CAN: 0, MEZ: 0, EST: 0 };
+  state.answers.forEach((a, i) => {
+    const p = QUESTIONS[i].options[a].p;
+    for (const k in p) score[k] += p[k];
+  });
+  const ranked = Object.keys(score).sort((a, b) => score[b] - score[a]);
+  return { main: ranked[0], second: ranked[1], score };
+}
+
+function answerSummary() {
+  return QUESTIONS.map((q, i) => ({ label: q.label, value: q.options[state.answers[i]].t }));
+}
+
+function leadTemperature() {
+  return ["Quente", "Morno", "Morno", "Frio"][state.answers[QUESTIONS.length - 1]];
+}
+
+function sendLead(result) {
+  if (!CONFIG.webhook) return;
+  const payload = {
+    ...state.lead,
+    solucao: SOLUTIONS[result.main].name,
+    solucao_alternativa: SOLUTIONS[result.second].name,
+    temperatura: leadTemperature(),
+    respostas: Object.fromEntries(answerSummary().map(r => [r.label, r.value])),
+    pagina: location.href,
+    data: new Date().toISOString()
+  };
+  fetch(CONFIG.webhook, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(payload),
+    keepalive: true
+  }).catch(() => {});
+}
+
+function renderResult() {
+  topBar.hidden = true;
+  const r = computeResult();
+  const s = SOLUTIONS[r.main];
+  const alt = SOLUTIONS[r.second];
+  const firstName = state.lead.nome.split(" ")[0];
+  const summary = answerSummary();
+
+  const msg = [
+    `Olá, Só Aço! Sou ${state.lead.nome}, da ${state.lead.empresa} (${state.lead.cidade}).`,
+    `Fiz o quiz e a solução recomendada foi: *${s.name}*.`,
+    "",
+    ...summary.map(x => `• ${x.label}: ${x.value}`),
+    "",
+    "Gostaria de um orçamento."
+  ].join("\n");
+  const waUrl = `https://wa.me/${CONFIG.whatsapp}?text=${encodeURIComponent(msg)}`;
+
+  app.innerHTML = `
+    <section class="screen result">
+      <span class="eyebrow">Resultado do diagnóstico</span>
+      <h2>${esc(firstName)}, esta é a <em>solução ideal</em> para você</h2>
+      <article class="result-card">
+        <div class="result-head">
+          <div class="ico">${I[s.icon]}</div>
+          <div><small>Recomendação Só Aço</small><h2>${esc(s.name)}</h2></div>
+        </div>
+        <div class="result-body">
+          <p>${esc(s.text)}</p>
+          <ul class="benefits">${s.benefits.map(b => `<li>${esc(b)}</li>`).join("")}</ul>
+          <dl class="summary">
+            ${summary.slice(0, 4).map(x => `<div><dt>${esc(x.label)}</dt><dd>${esc(x.value)}</dd></div>`).join("")}
+          </dl>
+        </div>
+      </article>
+      <p class="also">Também pode combinar com a sua operação: <b>${esc(alt.name)}</b></p>
+      <a class="btn" href="${waUrl}" target="_blank" rel="noopener">${I.wa} Falar com um especialista</a>
+      <button class="restart" id="restart">Refazer o quiz</button>
+    </section>`;
+  document.getElementById("restart").onclick = () => {
+    state.answers = [];
+    go(-1);
+  };
+}
+
+go(-1);
+</script>
+</body>
+</html>
