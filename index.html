@@ -170,6 +170,7 @@
   h1 { font-size: clamp(24px, 5.4vw, 38px); }
   h2 { font-size: clamp(19px, 4vw, 26px); }
   h1 em, h2 em { font-style: normal; color: var(--gold); }
+  .nowrap { white-space: nowrap; }
 
   .lead {
     font-size: clamp(15px, 2.4vw, 17px);
@@ -289,6 +290,17 @@
   .option.selected .check { background: var(--gold); border-color: var(--gold); color: var(--navy); }
   .option .check svg { width: 12px; height: 12px; opacity: 0; }
   .option.selected .check svg { opacity: 1; }
+
+  .other-box {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    padding: 18px;
+    border-radius: var(--radius);
+    background: var(--card);
+    border: 1.5px solid rgba(248,172,26,.35);
+    animation: enter .3s ease both;
+  }
 
   /* ---------- Formulário ---------- */
   .form-screen { gap: 22px; padding-top: 8px; }
@@ -520,7 +532,9 @@ const I = {
   truck: '<svg viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linejoin="round" stroke-linecap="round"><path d="M2 8h17v15H2zM19 13h6l5 5v5H19z"/><circle cx="8" cy="25" r="2.5"/><circle cx="24" cy="25" r="2.5"/></svg>',
   store: '<svg viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linejoin="round" stroke-linecap="round"><path d="M4 12l3-7h18l3 7M4 12h24v16H4zM4 12c0 2 2 3.5 4 3.5s4-1.5 4-3.5c0 2 2 3.5 4 3.5s4-1.5 4-3.5c0 2 2 3.5 4 3.5s4-1.5 4-3.5"/><path d="M13 28v-7h6v7"/></svg>',
   agro: '<svg viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linejoin="round" stroke-linecap="round"><path d="M16 29V12M16 18c-6 0-9-4-9-9 6 0 9 4 9 9zM16 22c5 0 8-3 8-8-5 0-8 3-8 8z"/><path d="M6 29h20"/></svg>',
-  pharma: '<svg viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linejoin="round" stroke-linecap="round"><rect x="4" y="4" width="24" height="24" rx="4"/><path d="M13 9h6v4h4v6h-4v4h-6v-4H9v-6h4z"/></svg>',
+  cart: '<svg viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linejoin="round" stroke-linecap="round"><path d="M3 5h4l3 15h15l3-11H8.5"/><circle cx="12" cy="26" r="2"/><circle cx="23" cy="26" r="2"/></svg>',
+  pharmacy: '<svg viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linejoin="round" stroke-linecap="round"><rect x="4" y="4" width="24" height="24" rx="3"/><path d="M13 9h6v4h4v6h-4v4h-6v-4H9v-6h4z"/></svg>',
+  bricks: '<svg viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linejoin="round" stroke-linecap="round"><rect x="3" y="6" width="26" height="20" rx="1.5"/><path d="M3 12.7h26M3 19.3h26M12 6v6.7M22 6v6.7M8 12.7v6.6M17 12.7v6.6M25 12.7v6.6M12 19.3V26M22 19.3V26"/></svg>',
   grid: '<svg viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linejoin="round" stroke-linecap="round"><rect x="4" y="4" width="10" height="10" rx="2"/><rect x="18" y="4" width="10" height="10" rx="2"/><rect x="4" y="18" width="10" height="10" rx="2"/><rect x="18" y="18" width="10" height="10" rx="2"/></svg>',
   pallet: '<svg viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linejoin="round" stroke-linecap="round"><rect x="6" y="5" width="20" height="16" rx="1.5"/><path d="M6 13h20M16 5v16M3 21h26v3H3zM6 24v4M16 24v4M26 24v4"/></svg>',
   boxes: '<svg viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linejoin="round" stroke-linecap="round"><rect x="4" y="15" width="11" height="13" rx="1.5"/><rect x="17" y="15" width="11" height="13" rx="1.5"/><rect x="10" y="3" width="12" height="12" rx="1.5"/><path d="M14 3v4h4V3M8 15v4h3v-4M21 15v4h3v-4"/></svg>',
@@ -568,10 +582,10 @@ const QUESTIONS = [
     label: "Segmento",
     title: "Qual é o <em>segmento</em> da sua empresa?",
     options: [
-      { t: "Supermercado", d: "Mercado, atacarejo, mercearia", icon: "store", p: { EST: 2, SEL: 2, MEZ: 1 } },
-      { t: "Farmácia", d: "Drogaria, perfumaria", icon: "pharma", p: { EST: 3, MEZ: 1 } },
-      { t: "Loja de material de construção", d: "Home center, depósito de materiais", icon: "tools", p: { SEL: 2, CAN: 2, EST: 1 } },
-      { t: "Outro", d: "Outro tipo de negócio", icon: "grid", p: { SEL: 1, EST: 1, MEZ: 1 } }
+      { t: "Supermercado", d: "Mercado, atacarejo, hortifrúti", icon: "cart", p: { SEL: 2, DRV: 1, EST: 1 } },
+      { t: "Farmácia", d: "Drogaria, perfumaria", icon: "pharmacy", p: { EST: 3, MEZ: 1 } },
+      { t: "Loja de material de construção", d: "Home center, ferragens, acabamentos", icon: "bricks", p: { SEL: 2, CAN: 2 } },
+      { t: "Outro", d: "Conte qual é o seu segmento", icon: "grid", open: true, p: { SEL: 1, EST: 1, MEZ: 1 } }
     ]
   },
   {
@@ -699,7 +713,7 @@ const CIDADES = {"PI":["Acauã","Agricolândia","Água Branca","Alagoinha do Pia
 const app = document.getElementById("app");
 const topBar = document.getElementById("top");
 const bar = document.getElementById("bar");
-const state = { step: -1, answers: [], lead: null };
+const state = { step: -1, answers: [], other: {}, lead: null };
 let advanceTimer = null;
 
 document.getElementById("year").textContent = new Date().getFullYear();
@@ -734,7 +748,7 @@ function renderIntro() {
   app.innerHTML = `
     <section class="screen intro">
       <div class="logo"><img src="assets/logo-so-aco.png" alt="Só Aço"></div>
-      <h1>Gôndolas e porta-pallets <em>para seu negócio</em></h1>
+      <h1>Gôndolas e <span class="nowrap">porta-pallets</span> <em>para seu negócio</em></h1>
       <p class="lead">Responda 6 perguntas rápidas e receba a recomendação da solução que mais combina com a sua operação, direto de um especialista Só Aço.</p>
       <div class="facts">
         <span>${I.list} 6 perguntas</span>
@@ -785,8 +799,19 @@ function renderQuestion(i) {
             <span class="check">${I.check}</span>
           </button>`).join("")}
       </div>
+      <div class="other-box" id="otherBox"${q.options[state.answers[i]]?.open ? "" : " hidden"}>
+        <div class="field"><label for="otherInput">Qual é o seu segmento?</label><input id="otherInput" maxlength="60" placeholder="Ex.: Loja de conveniência" value="${esc(state.other[i] || "")}"></div>
+        <button class="btn" id="otherNext">Continuar ${I.arrow}</button>
+      </div>
     </section>`;
   document.getElementById("back").onclick = () => go(i - 1);
+  const otherBox = document.getElementById("otherBox");
+  const otherInput = document.getElementById("otherInput");
+  document.getElementById("otherNext").onclick = () => {
+    state.other[i] = otherInput.value.trim();
+    go(i + 1);
+  };
+  otherInput.addEventListener("keydown", e => { if (e.key === "Enter") document.getElementById("otherNext").click(); });
   app.querySelectorAll(".option").forEach(btn => {
     btn.onclick = () => {
       app.querySelectorAll(".option").forEach(b => { b.classList.remove("selected"); b.setAttribute("aria-checked", "false"); });
@@ -794,6 +819,9 @@ function renderQuestion(i) {
       btn.setAttribute("aria-checked", "true");
       state.answers[i] = Number(btn.dataset.n);
       clearTimeout(advanceTimer);
+      const open = q.options[state.answers[i]].open;
+      otherBox.hidden = !open;
+      if (open) return otherInput.focus();
       advanceTimer = setTimeout(() => go(i + 1), 320);
     };
   });
@@ -938,7 +966,10 @@ function computeResult() {
 }
 
 function answerSummary() {
-  return QUESTIONS.map((q, i) => ({ label: q.label, value: q.options[state.answers[i]].t }));
+  return QUESTIONS.map((q, i) => {
+    const o = q.options[state.answers[i]];
+    return { label: q.label, value: o.open && state.other[i] ? `${o.t}: ${state.other[i]}` : o.t };
+  });
 }
 
 function leadTemperature() {
@@ -1006,6 +1037,7 @@ function renderResult() {
     </section>`;
   document.getElementById("restart").onclick = () => {
     state.answers = [];
+    state.other = {};
     go(-1);
   };
 }
