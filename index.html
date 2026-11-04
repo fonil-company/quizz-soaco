@@ -378,103 +378,71 @@
   }
   .loading p { color: var(--steel); font-weight: 600; margin: 0; }
 
-  /* ---------- Resultado ---------- */
-  .result { gap: 22px; padding-top: 8px; }
-  .result-card {
-    position: relative;
-    border-radius: 14px;
-    overflow: hidden;
-    background: var(--white);
-    color: var(--navy);
-  }
-  .result-head {
-    background: var(--navy-deep);
-    color: var(--white);
-    padding: 26px 24px 22px;
-    border-bottom: 4px solid var(--gold);
-    display: flex;
-    gap: 18px;
+  /* ---------- Obrigado ---------- */
+  .thanks {
+    justify-content: center;
     align-items: center;
+    text-align: center;
+    gap: 22px;
+    padding-block: 24px;
   }
-  .result-head .ico {
-    width: 64px;
-    height: 64px;
-    flex: none;
-    border-radius: 10px;
-    background: var(--gold);
-    color: var(--navy);
+  .thanks .seal {
+    width: 92px;
+    height: 92px;
+    border-radius: 50%;
     display: grid;
     place-items: center;
+    background: var(--gold);
+    color: var(--navy);
+    box-shadow: 0 0 0 10px rgba(248,172,26,.14), 0 24px 60px -20px rgba(248,172,26,.6);
+    animation: pop .5s cubic-bezier(.2,.7,.2,1.3) both;
   }
-  .result-head .ico svg { width: 38px; height: 38px; }
-  .result-head small {
-    display: block;
-    font-size: 11px;
-    font-weight: 700;
-    letter-spacing: .18em;
-    text-transform: uppercase;
-    color: var(--gold);
-    margin-bottom: 6px;
+  .thanks .seal svg { width: 44px; height: 44px; }
+  @keyframes pop {
+    from { opacity: 0; transform: scale(.6); }
+    to { opacity: 1; transform: none; }
   }
-  .result-head h2 { font-size: clamp(17px, 3.6vw, 22px); }
-  .result-body { padding: 22px 24px 26px; display: flex; flex-direction: column; gap: 18px; }
-  .result-body p { margin: 0; font-size: 15px; line-height: 1.6; color: #24345E; }
-  .benefits { list-style: none; margin: 0; padding: 0; display: grid; gap: 10px; }
-  .benefits li {
+  .thanks h1 { max-width: 620px; }
+  .thanks .lead { max-width: 540px; }
+  .thanks .lead b { color: var(--white); white-space: nowrap; }
+  .steps {
+    list-style: none;
+    margin: 6px 0 0;
+    padding: 0;
+    width: min(100%, 520px);
+    display: grid;
+    gap: 10px;
+    text-align: left;
+    counter-reset: step;
+  }
+  .steps li {
     display: flex;
-    gap: 12px;
-    align-items: flex-start;
+    align-items: center;
+    gap: 14px;
+    padding: 14px 16px;
+    border-radius: var(--radius);
+    background: var(--card);
+    border: 1.5px solid rgba(255,255,255,.12);
     font-size: 14px;
     font-weight: 600;
     line-height: 1.45;
+    counter-increment: step;
   }
-  .benefits li::before {
-    content: "";
-    width: 10px;
-    height: 10px;
-    margin-top: 5px;
+  .steps li::before {
+    content: counter(step);
+    width: 32px;
+    height: 32px;
     flex: none;
-    border-radius: 2px;
-    background: var(--gold);
-  }
-  .summary {
-    display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 10px;
-  }
-  .summary div {
-    background: var(--light);
     border-radius: 8px;
-    padding: 10px 12px;
-  }
-  .summary dt {
-    font-size: 10px;
-    font-weight: 700;
-    letter-spacing: .14em;
-    text-transform: uppercase;
-    color: #6A7487;
-  }
-  .summary dd { margin: 3px 0 0; font-size: 13px; font-weight: 700; }
-  .also {
+    display: grid;
+    place-items: center;
+    background: rgba(248,172,26,.14);
+    color: var(--gold);
+    font-family: var(--font-title);
     font-size: 13px;
-    color: var(--steel);
-    text-align: center;
-    margin: 0;
   }
-  .also b { color: var(--white); }
-  .result .btn { width: 100%; }
-  .restart {
-    align-self: center;
-    background: none;
-    border: 0;
-    color: var(--steel);
-    font-size: 13px;
-    font-weight: 600;
-    text-decoration: underline;
-    text-underline-offset: 3px;
-    padding: 6px;
-  }
-  .restart:hover { color: var(--white); }
+  .steps li.done { border-color: rgba(248,172,26,.45); }
+  .steps li.done::before { content: "✓"; background: var(--gold); color: var(--navy); font-family: var(--font-body); font-weight: 800; }
 
   footer {
     text-align: center;
@@ -488,9 +456,6 @@
     .options { grid-template-columns: 1fr; }
     .option { min-height: 72px; padding: 14px; }
     .row { grid-template-columns: 1fr; }
-    .summary { grid-template-columns: 1fr; }
-    .result-head { padding: 22px 18px 18px; }
-    .result-body { padding: 20px 18px 22px; }
     .top .badge { width: 44px; height: 44px; }
   }
   @media (prefers-reduced-motion: reduce) {
@@ -518,8 +483,6 @@
    CONFIGURAÇÃO
    ========================================================= */
 const CONFIG = {
-  // Número de WhatsApp da Só Aço (DDI + DDD + número, só dígitos)
-  whatsapp: "5500000000000",
   // Webhook de leads do CRM Fonil (recebe o lead em JSON via POST)
   webhook: "https://crm.fonilgroup.com.br/api/webhooks/leads/cmvjv1e85004prkvni2juj0uk",
   // Origem do lead registrada no CRM
@@ -563,9 +526,8 @@ const I = {
   back: '<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M11 6l-6 6 6 6"/></svg>',
   clock: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>',
   list: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M9 6h11M9 12h11M9 18h11M4 6h.01M4 12h.01M4 18h.01"/></svg>',
-  gift: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l2.5 5.5L20 9l-4 4 1 6-5-3-5 3 1-6-4-4 5.5-.5z"/></svg>',
-  lock: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg>',
-  wa: '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2a10 10 0 0 0-8.6 15.1L2 22l5-1.3A10 10 0 1 0 12 2zm0 18.2c-1.5 0-3-.4-4.3-1.2l-.3-.2-3 .8.8-2.9-.2-.3A8.2 8.2 0 1 1 12 20.2zm4.5-6.1c-.2-.1-1.5-.7-1.7-.8-.2-.1-.4-.1-.6.1l-.8 1c-.1.2-.3.2-.5.1a6.7 6.7 0 0 1-3.3-2.9c-.2-.4.2-.4.7-1.3.1-.2 0-.3 0-.4l-.8-1.8c-.2-.5-.4-.4-.6-.4h-.5c-.2 0-.4.1-.7.3-.2.3-.9.9-.9 2.2s.9 2.5 1 2.7c.1.2 1.8 2.8 4.4 3.9 1.6.7 2.3.8 3.1.6.5-.1 1.5-.6 1.7-1.2.2-.6.2-1.1.2-1.2-.1-.1-.3-.2-.5-.3z"/></svg>'
+  headset: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M4 14v-2a8 8 0 0 1 16 0v2"/><rect x="3" y="14" width="4" height="6" rx="1.5"/><rect x="17" y="14" width="4" height="6" rx="1.5"/><path d="M19 20c0 1.5-2 2-5 2"/></svg>',
+  lock: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg>'
 };
 
 /* =========================================================
@@ -733,7 +695,7 @@ function go(step) {
   if (step < 0) return renderIntro();
   if (step < QUESTIONS.length) return renderQuestion(step);
   if (step === QUESTIONS.length) return renderForm();
-  renderResult();
+  renderThanks();
 }
 
 function renderIntro() {
@@ -742,11 +704,11 @@ function renderIntro() {
     <section class="screen intro">
       <div class="logo"><img src="assets/logo-so-aco.png" alt="Só Aço"></div>
       <h1><span class="nowrap">Porta-pallets</span> <em>para seu negócio</em></h1>
-      <p class="lead">Responda 6 perguntas rápidas e receba a recomendação do porta-pallet que mais combina com a sua operação, direto de um especialista Só Aço.</p>
+      <p class="lead">Responda 6 perguntas rápidas sobre a sua operação e um especialista Só Aço vai entrar em contato para indicar o porta-pallet ideal para o seu negócio.</p>
       <div class="facts">
         <span>${I.list} 6 perguntas</span>
         <span>${I.clock} Menos de 1 minuto</span>
-        <span>${I.gift} Resultado na hora</span>
+        <span>${I.headset} Atendimento especializado</span>
       </div>
       <button class="btn" id="start">Começar agora ${I.arrow}</button>
       <svg class="rack" viewBox="0 0 520 120" fill="none" aria-hidden="true">
@@ -827,9 +789,9 @@ function renderForm() {
   app.innerHTML = `
     <section class="screen form-screen">
       <button class="btn-back" id="back">${I.back} Voltar</button>
-      <span class="eyebrow">Seu resultado está pronto</span>
-      <h2>Para onde enviamos a sua <em>recomendação</em>?</h2>
-      <p class="lead">Preencha seus dados para ver o resultado. Um especialista Só Aço pode entrar em contato para ajudar no seu projeto.</p>
+      <span class="eyebrow">Última etapa</span>
+      <h2>Como o nosso <em>especialista</em> fala com você?</h2>
+      <p class="lead">Preencha seus dados para que um especialista Só Aço entre em contato e ajude no seu projeto.</p>
       <form id="leadForm" novalidate>
         <div class="field"><label for="nome">Nome</label><input id="nome" name="nome" autocomplete="name" placeholder="Seu nome completo" value="${esc(l.nome || "")}"><span class="err"></span></div>
         <div class="field"><label for="whats">WhatsApp</label><input id="whats" name="whats" type="tel" inputmode="numeric" autocomplete="tel" placeholder="(00) 00000-0000" value="${esc(l.whats || "")}"><span class="err"></span></div>
@@ -846,7 +808,7 @@ function renderForm() {
           <div class="field"><label for="cidade">Cidade</label>
             <select id="cidade" name="cidade" disabled><option value="">Selecione o estado primeiro</option></select><span class="err"></span></div>
         </div>
-        <button class="btn" type="submit">Ver meu resultado ${I.arrow}</button>
+        <button class="btn" type="submit">Enviar minhas respostas ${I.arrow}</button>
         <p class="privacy">${I.lock} Seus dados estão protegidos e serão usados apenas para o contato da Só Aço sobre o seu projeto.</p>
       </form>
     </section>`;
@@ -940,12 +902,12 @@ function showLoading() {
   app.innerHTML = `
     <section class="screen loading">
       <div class="loader"><span></span><span></span><span></span></div>
-      <h2>Analisando sua <em>operação</em></h2>
-      <p>Cruzando carga, peso e espaço disponível…</p>
+      <h2>Enviando suas <em>respostas</em></h2>
+      <p>Só um instante…</p>
     </section>`;
   const result = computeResult();
   sendLead(result);
-  setTimeout(() => go(QUESTIONS.length + 1), 1600);
+  setTimeout(() => go(QUESTIONS.length + 1), 1200);
 }
 
 function computeResult() {
@@ -1048,52 +1010,23 @@ function sendLead(result) {
   post().catch(() => setTimeout(() => post().catch(() => {}), 1500));
 }
 
-function renderResult() {
+// A solução recomendada continua sendo calculada e vai só para o CRM (qualificação do lead);
+// o visitante vê apenas o agradecimento e aguarda o contato do especialista.
+function renderThanks() {
   topBar.hidden = true;
-  const r = computeResult();
-  const s = SOLUTIONS[r.main];
-  const alt = SOLUTIONS[r.second];
   const firstName = state.lead.nome.split(" ")[0];
-  const summary = answerSummary();
-
-  const msg = [
-    `Olá, Só Aço! Sou ${state.lead.nome}, da ${state.lead.empresa} (${state.lead.cidade}/${state.lead.estado}).`,
-    `CNPJ: ${state.lead.cnpj}`,
-    `Fiz o quiz e a solução recomendada foi: *${s.name}*.`,
-    "",
-    ...summary.map(x => `• ${x.label}: ${x.value}`),
-    "",
-    "Gostaria de um orçamento."
-  ].join("\n");
-  const waUrl = `https://wa.me/${CONFIG.whatsapp}?text=${encodeURIComponent(msg)}`;
-
   app.innerHTML = `
-    <section class="screen result">
-      <span class="eyebrow">Resultado do diagnóstico</span>
-      <h2>${esc(firstName)}, esta é a <em>solução ideal</em> para você</h2>
-      <article class="result-card">
-        <div class="result-head">
-          <div class="ico">${I[s.icon]}</div>
-          <div><small>Recomendação Só Aço</small><h2>${esc(s.name)}</h2></div>
-        </div>
-        <div class="result-body">
-          <p>${esc(s.text)}</p>
-          <ul class="benefits">${s.benefits.map(b => `<li>${esc(b)}</li>`).join("")}</ul>
-          <dl class="summary">
-            ${summary.slice(0, 4).map(x => `<div><dt>${esc(x.label)}</dt><dd>${esc(x.value)}</dd></div>`).join("")}
-          </dl>
-        </div>
-      </article>
-      <p class="also">Também pode combinar com a sua operação: <b>${esc(alt.name)}</b></p>
-      <a class="btn" href="${waUrl}" target="_blank" rel="noopener">${I.wa} Falar com um especialista</a>
-      <button class="restart" id="restart">Refazer o quiz</button>
+    <section class="screen thanks">
+      <div class="seal">${I.check}</div>
+      <span class="eyebrow">Respostas enviadas</span>
+      <h1>Obrigado, <em>${esc(firstName)}</em>!</h1>
+      <p class="lead">Recebemos as informações da sua operação. Em breve, um especialista da equipe Só Aço vai entrar em contato pelo WhatsApp <b>${esc(state.lead.whats)}</b> para entender o seu projeto.</p>
+      <ol class="steps">
+        <li class="done">Suas respostas chegaram à nossa equipe</li>
+        <li>Um especialista analisa a sua operação</li>
+        <li>Ele fala com você e indica o <span class="nowrap">porta-pallet</span> ideal para o seu galpão</li>
+      </ol>
     </section>`;
-  document.getElementById("restart").onclick = () => {
-    state.answers = [];
-    state.other = {};
-    state.leadSent = false;
-    go(-1);
-  };
 }
 
 go(-1);
