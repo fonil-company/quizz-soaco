@@ -13,7 +13,7 @@ Quiz estático para campanhas Meta Ads, servido por Nginx em Docker (mesmo esque
 O quiz envia o lead para `/api/lead` no próprio domínio. O Nginx repassa para `CRM_WEBHOOK_URL`. O token fica só no servidor, e o limite é de 10 envios por minuto por IP.
 
 Campos em comum com a LP: `phone`, `name`, `document`, `city`, `state`, `company`, `segment`, `product`, UTMs, `gclid`/`gbraid`/`wbraid`/`fbclid`, `fbp`/`fbc`, `landing_page`.
-Campos só do quiz: `source` ("Quiz Só Aço"), `solucao`, `solucao_alternativa`, `temperatura`, `respostas`, uma chave por pergunta, `utms`, `referrer`, `notes`, `created_at`.
+Campos só do quiz: `source` ("Quiz Só Aço"), `cargo`, `contato_preferido` ("WhatsApp" ou "Ligação"), `solucao`, `solucao_alternativa`, `temperatura`, `respostas`, uma chave por pergunta, `utms`, `referrer`, `notes`, `created_at`.
 
 UTMs e IDs de clique ficam guardados por 90 dias no navegador. Quando o envio falha, o console mostra `[CRM] falha ao enviar lead` e o dataLayer recebe `crm_lead_error`.
 

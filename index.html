@@ -241,45 +241,6 @@
   /* ---------- Perguntas ---------- */
   .question { gap: 22px; padding-top: 8px; }
   .question .hint { font-size: 14px; color: var(--steel); margin: -10px 0 0; }
-  .q-figure { margin: 0; display: flex; flex-direction: column; gap: 8px; }
-  .q-zoom {
-    display: block;
-    padding: 0;
-    border: 1.5px solid rgba(255,255,255,.12);
-    border-radius: var(--radius);
-    overflow: hidden;
-    background: var(--white);
-    cursor: zoom-in;
-    transition: border-color .2s ease;
-  }
-  .q-zoom:hover { border-color: rgba(248,172,26,.6); }
-  .q-zoom img { width: 100%; height: auto; }
-  .q-figure figcaption { font-size: 12px; color: var(--steel); text-align: center; }
-  .lightbox {
-    position: fixed;
-    inset: 0;
-    z-index: 50;
-    display: grid;
-    place-items: center;
-    padding: max(16px, env(safe-area-inset-top)) 16px max(16px, env(safe-area-inset-bottom));
-    background: rgba(3, 27, 77, .94);
-    cursor: zoom-out;
-    animation: enter .25s ease both;
-  }
-  .lightbox img { max-width: 100%; max-height: calc(100vh - 32px); max-height: calc(100dvh - 32px); width: auto; border-radius: 8px; background: var(--white); }
-  .lightbox-close {
-    position: absolute;
-    top: max(12px, env(safe-area-inset-top));
-    right: 12px;
-    width: 44px;
-    height: 44px;
-    border: 0;
-    border-radius: 50%;
-    background: var(--gold);
-    color: var(--navy);
-    font-size: 28px;
-    line-height: 1;
-  }
   .options {
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -297,6 +258,51 @@
     background: var(--card);
     border: 1.5px solid rgba(255,255,255,.12);
     transition: border-color .2s ease, background .2s ease, transform .2s ease;
+  }
+  .q-figure {
+    display: block;
+    border-radius: var(--radius);
+    overflow: hidden;
+    border: 1.5px solid rgba(255,255,255,.12);
+    background: #fff;
+    margin-top: -6px;
+  }
+  .q-figure { position: relative; width: 100%; padding: 0; cursor: zoom-in; }
+  .q-figure img { display: block; width: 100%; height: auto; }
+  .zoom-hint {
+    position: absolute;
+    right: 8px;
+    bottom: 8px;
+    font-size: 11px;
+    font-weight: 700;
+    padding: 4px 8px;
+    border-radius: 6px;
+    background: rgba(5,29,89,.85);
+    color: #fff;
+  }
+  .zoom {
+    position: fixed;
+    inset: 0;
+    z-index: 100;
+    display: grid;
+    place-items: center;
+    padding: 16px;
+    background: rgba(2,10,32,.92);
+    cursor: zoom-out;
+    animation: enter .2s ease both;
+  }
+  .zoom img { max-width: 100%; max-height: 100%; border-radius: 8px; }
+  .zoom-close {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    font-size: 28px;
+    line-height: 1;
+    color: #fff;
+    background: rgba(255,255,255,.12);
   }
   .option:hover { border-color: rgba(248,172,26,.6); background: var(--card-hover); }
   .option.selected { border-color: var(--gold); background: rgba(248,172,26,.14); }
@@ -379,6 +385,26 @@
   .field.invalid input, .field.invalid select { border-color: #FF6B5B; }
   .field .err { font-size: 12px; color: #FF9A8F; font-weight: 600; min-height: 0; }
   .row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+  .field[hidden] { display: none; }
+  .choices { border: 0; margin: 6px 0 0; padding: 0; min-width: 0; }
+  .choices legend { font-size: 15px; font-weight: 700; line-height: 1.4; margin-bottom: 10px; padding: 0; }
+  .choice-row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+  .choices .choice { position: relative; cursor: pointer; font-size: 15px; letter-spacing: 0; text-transform: none; color: inherit; }
+  .choice input { position: absolute; opacity: 0; pointer-events: none; }
+  .choice span {
+    display: block;
+    text-align: center;
+    font-weight: 700;
+    padding: 15px 12px;
+    border-radius: 8px;
+    background: var(--card);
+    border: 1.5px solid rgba(255,255,255,.12);
+    transition: border-color .2s ease, background .2s ease;
+  }
+  .choice:hover span { border-color: rgba(248,172,26,.6); }
+  .choice input:checked + span { border-color: var(--gold); background: rgba(248,172,26,.14); color: var(--gold); }
+  .choice input:focus-visible + span { box-shadow: 0 0 0 4px rgba(248,172,26,.25); }
+  .choices.invalid .choice span { border-color: #FF6B5B; }
   .privacy {
     display: flex;
     gap: 10px;
@@ -600,11 +626,13 @@ const QUESTIONS = [
   {
     key: "segmento",
     label: "Segmento",
-    title: "Qual é o <em>segmento</em> da sua empresa?",
+    title: "Qual o <em>segmento</em> da sua empresa?",
+    other: { label: "Qual é o seu segmento?", placeholder: "Ex.: Loja de material de construção", error: "Informe o segmento da sua empresa." },
     options: [
+      { t: "Distribuidora", d: "Atacado e logística", icon: "truck", p: { SEL: 2, DRV: 2 } },
+      { t: "Depósito", d: "Estoque e armazenagem", icon: "boxes", p: { SEL: 2, DRV: 1, BAN: 1 } },
       { t: "Supermercado", d: "Mercado, atacarejo, hortifrúti", icon: "cart", p: { SEL: 2, DRV: 1, BAN: 1 } },
-      { t: "Centro de distribuição", d: "Atacado, logística, indústria", icon: "truck", p: { SEL: 2, DRV: 2 } },
-      { t: "Loja de material de construção", d: "Home center, ferragens, acabamentos", icon: "bricks", p: { SEL: 2, BAN: 1 } },
+      { t: "Indústria", d: "Matéria-prima e produto acabado", icon: "factory", p: { SEL: 2, DRV: 2, BAN: 1 } },
       { t: "Outro", d: "Conte qual é o seu segmento", icon: "grid", open: true, p: { SEL: 1, BAN: 1 } }
     ]
   },
@@ -613,25 +641,22 @@ const QUESTIONS = [
     label: "Tipo de carga",
     title: "O que você precisa <em>armazenar</em>?",
     options: [
-      { t: "Caixas e produtos embalados", d: "Mercadorias do dia a dia e reposição da loja", icon: "pallet", p: { SEL: 4, DRV: 2 } },
-      { t: "Grande volume do mesmo produto", d: "Muitos pallets iguais, pouca variedade", icon: "drive", p: { DRV: 6 } },
-      { t: "Caixas e volumes médios", d: "Separação manual, picking", icon: "boxes", p: { BAN: 4, SEL: 1 } },
-      { t: "Peças pequenas e itens avulsos", d: "Carga fracionada, almoxarifado", icon: "tools", p: { BAN: 5 } }
+      { t: "Produtos paletizados", d: "Cargas sobre pallets", icon: "pallet", p: { SEL: 4, DRV: 2 } },
+      { t: "Produtos não paletizados e itens avulsos", d: "Caixas, peças e cargas fracionadas", icon: "tools", p: { BAN: 5 } },
+      { t: "Parte dos produtos são paletizados e outra parte não", d: "Pallets e itens avulsos juntos", icon: "boxes", p: { SEL: 3, BAN: 3 } }
     ]
   },
   {
     key: "peso",
     label: "Peso por nível",
-    title: "Qual o <em>peso médio</em> por nível ou posição?",
-    image: {
-      src: "assets/niveis-armazenagem.webp",
-      alt: "Porta-pallet com 4 níveis: cada par de longarinas na mesma altura forma um nível de armazenagem, e cada nível comporta 2 posições."
-    },
+    title: "Qual <em>peso médio por nível</em> você precisa armazenar?",
+    image: { src: "assets/niveis-armazenagem.webp", w: 1200, h: 800, alt: "Entenda os níveis de armazenagem: cada par de longarinas na mesma altura forma um nível, e cada nível comporta 2 posições." },
     options: [
-      { t: "Até 300 kg", d: "Carga leve", icon: "w1", p: { BAN: 3 } },
-      { t: "300 a 1.000 kg", d: "Carga média", icon: "w2", p: { SEL: 2, BAN: 1 } },
-      { t: "1.000 a 2.000 kg", d: "Carga pesada", icon: "w3", p: { SEL: 3, DRV: 2 } },
-      { t: "Acima de 2.000 kg", d: "Carga extra pesada", icon: "w4", p: { DRV: 3, SEL: 2 } }
+      { t: "Até 250 kg", d: "Carga leve", icon: "w1", p: { BAN: 3 } },
+      { t: "Até 600 kg", d: "Carga média", icon: "w2", p: { BAN: 2, SEL: 1 } },
+      { t: "Até 1.000 kg", d: "Carga média-pesada", icon: "w2", p: { SEL: 2, BAN: 1 } },
+      { t: "Até 2.500 kg", d: "Carga pesada", icon: "w3", p: { SEL: 3, DRV: 2 } },
+      { t: "Acima de 2.500 kg", d: "Carga extra pesada", icon: "w4", p: { DRV: 3, SEL: 2 } }
     ]
   },
   {
@@ -647,13 +672,12 @@ const QUESTIONS = [
   },
   {
     key: "pe_direito",
-    label: "Pé-direito",
-    title: "Qual a <em>altura</em> (pé-direito) do seu galpão?",
+    label: "Altura disponível",
+    title: "Qual <em>altura disponível</em> para o armazenamento?",
     options: [
       { t: "Até 4 metros", d: "Ambiente baixo", icon: "w1", p: { BAN: 3, SEL: 1 } },
-      { t: "De 4 a 8 metros", d: "Altura intermediária", icon: "h1", p: { SEL: 2, BAN: 1 } },
-      { t: "De 8 a 12 metros", d: "Galpão alto", icon: "h2", p: { SEL: 2, DRV: 2 } },
-      { t: "Acima de 12 metros", d: "Grande verticalização", icon: "h3", p: { SEL: 2, DRV: 3 } }
+      { t: "Até 8 metros", d: "Altura intermediária", icon: "h1", p: { SEL: 2, BAN: 1 } },
+      { t: "Acima de 8 metros", d: "Galpão alto", icon: "h3", p: { SEL: 2, DRV: 3 } }
     ]
   },
   {
@@ -709,6 +733,8 @@ const SOLUTIONS = {
    ESTADOS E CIDADES ATENDIDOS (municípios oficiais do IBGE)
    ========================================================= */
 const ESTADOS = { PI: "Piauí", MA: "Maranhão" };
+const CARGOS = ["Proprietário", "Sócio", "Comprador", "Consultor", "Outro"];
+const CONTATOS = ["WhatsApp", "Ligação"];
 const CIDADES = {"PI":["Acauã","Agricolândia","Água Branca","Alagoinha do Piauí","Alegrete do Piauí","Alto Longá","Altos","Alvorada do Gurguéia","Amarante","Angical do Piauí","Anísio de Abreu","Antônio Almeida","Aroazes","Aroeiras do Itaim","Arraial","Assunção do Piauí","Avelino Lopes","Baixa Grande do Ribeiro","Barra D'Alcântara","Barras","Barreiras do Piauí","Barro Duro","Batalha","Bela Vista do Piauí","Belém do Piauí","Beneditinos","Bertolínia","Betânia do Piauí","Boa Hora","Bocaina","Bom Jesus","Bom Princípio do Piauí","Bonfim do Piauí","Boqueirão do Piauí","Brasileira","Brejo do Piauí","Buriti dos Lopes","Buriti dos Montes","Cabeceiras do Piauí","Cajazeiras do Piauí","Cajueiro da Praia","Caldeirão Grande do Piauí","Campinas do Piauí","Campo Alegre do Fidalgo","Campo Grande do Piauí","Campo Largo do Piauí","Campo Maior","Canavieira","Canto do Buriti","Capitão de Campos","Capitão Gervásio Oliveira","Caracol","Caraúbas do Piauí","Caridade do Piauí","Castelo do Piauí","Caxingó","Cocal","Cocal de Telha","Cocal dos Alves","Coivaras","Colônia do Gurguéia","Colônia do Piauí","Conceição do Canindé","Coronel José Dias","Corrente","Cristalândia do Piauí","Cristino Castro","Curimatá","Currais","Curral Novo do Piauí","Curralinhos","Demerval Lobão","Dirceu Arcoverde","Dom Expedito Lopes","Dom Inocêncio","Domingos Mourão","Elesbão Veloso","Eliseu Martins","Esperantina","Fartura do Piauí","Flores do Piauí","Floresta do Piauí","Floriano","Francinópolis","Francisco Ayres","Francisco Macedo","Francisco Santos","Fronteiras","Geminiano","Gilbués","Guadalupe","Guaribas","Hugo Napoleão","Ilha Grande","Inhuma","Ipiranga do Piauí","Isaías Coelho","Itainópolis","Itaueira","Jacobina do Piauí","Jaicós","Jardim do Mulato","Jatobá do Piauí","Jerumenha","João Costa","Joaquim Pires","Joca Marques","José de Freitas","Juazeiro do Piauí","Júlio Borges","Jurema","Lagoa Alegre","Lagoa de São Francisco","Lagoa do Barro do Piauí","Lagoa do Piauí","Lagoa do Sítio","Lagoinha do Piauí","Landri Sales","Luís Correia","Luzilândia","Madeiro","Manoel Emídio","Marcolândia","Marcos Parente","Massapê do Piauí","Matias Olímpio","Miguel Alves","Miguel Leão","Milton Brandão","Monsenhor Gil","Monsenhor Hipólito","Monte Alegre do Piauí","Morro Cabeça no Tempo","Morro do Chapéu do Piauí","Murici dos Portelas","Nazaré do Piauí","Nazária","Nossa Senhora de Nazaré","Nossa Senhora dos Remédios","Nova Santa Rita","Novo Oriente do Piauí","Novo Santo Antônio","Oeiras","Olho D'Água do Piauí","Padre Marcos","Paes Landim","Pajeú do Piauí","Palmeira do Piauí","Palmeirais","Paquetá","Parnaguá","Parnaíba","Passagem Franca do Piauí","Patos do Piauí","Pau D'Arco do Piauí","Paulistana","Pavussu","Pedro II","Pedro Laurentino","Picos","Pimenteiras","Pio IX","Piracuruca","Piripiri","Porto","Porto Alegre do Piauí","Prata do Piauí","Queimada Nova","Redenção do Gurguéia","Regeneração","Riacho Frio","Ribeira do Piauí","Ribeiro Gonçalves","Rio Grande do Piauí","Santa Cruz do Piauí","Santa Cruz dos Milagres","Santa Filomena","Santa Luz","Santa Rosa do Piauí","Santana do Piauí","Santo Antônio de Lisboa","Santo Antônio dos Milagres","Santo Inácio do Piauí","São Braz do Piauí","São Félix do Piauí","São Francisco de Assis do Piauí","São Francisco do Piauí","São Gonçalo do Gurguéia","São Gonçalo do Piauí","São João da Canabrava","São João da Fronteira","São João da Serra","São João da Varjota","São João do Arraial","São João do Piauí","São José do Divino","São José do Peixe","São José do Piauí","São Julião","São Lourenço do Piauí","São Luis do Piauí","São Miguel da Baixa Grande","São Miguel do Fidalgo","São Miguel do Tapuio","São Pedro do Piauí","São Raimundo Nonato","Sebastião Barros","Sebastião Leal","Sigefredo Pacheco","Simões","Simplício Mendes","Socorro do Piauí","Sussuapara","Tamboril do Piauí","Tanque do Piauí","Teresina","União","Uruçuí","Valença do Piauí","Várzea Branca","Várzea Grande","Vera Mendes","Vila Nova do Piauí","Wall Ferraz"],"MA":["Açailândia","Afonso Cunha","Água Doce do Maranhão","Alcântara","Aldeias Altas","Altamira do Maranhão","Alto Alegre do Maranhão","Alto Alegre do Pindaré","Alto Parnaíba","Amapá do Maranhão","Amarante do Maranhão","Anajatuba","Anapurus","Apicum-Açu","Araguanã","Araioses","Arame","Arari","Axixá","Bacabal","Bacabeira","Bacuri","Bacurituba","Balsas","Barão de Grajaú","Barra do Corda","Barreirinhas","Bela Vista do Maranhão","Belágua","Benedito Leite","Bequimão","Bernardo do Mearim","Boa Vista do Gurupi","Bom Jardim","Bom Jesus das Selvas","Bom Lugar","Brejo","Brejo de Areia","Buriti","Buriti Bravo","Buriticupu","Buritirana","Cachoeira Grande","Cajapió","Cajari","Campestre do Maranhão","Cândido Mendes","Cantanhede","Capinzal do Norte","Carolina","Carutapera","Caxias","Cedral","Central do Maranhão","Centro do Guilherme","Centro Novo do Maranhão","Chapadinha","Cidelândia","Codó","Coelho Neto","Colinas","Conceição do Lago-Açu","Coroatá","Cururupu","Davinópolis","Dom Pedro","Duque Bacelar","Esperantinópolis","Estreito","Feira Nova do Maranhão","Fernando Falcão","Formosa da Serra Negra","Fortaleza dos Nogueiras","Fortuna","Godofredo Viana","Gonçalves Dias","Governador Archer","Governador Edison Lobão","Governador Eugênio Barros","Governador Luiz Rocha","Governador Newton Bello","Governador Nunes Freire","Graça Aranha","Grajaú","Guimarães","Humberto de Campos","Icatu","Igarapé do Meio","Igarapé Grande","Imperatriz","Itaipava do Grajaú","Itapecuru Mirim","Itinga do Maranhão","Jatobá","Jenipapo dos Vieiras","João Lisboa","Joselândia","Junco do Maranhão","Lago da Pedra","Lago do Junco","Lago dos Rodrigues","Lago Verde","Lagoa do Mato","Lagoa Grande do Maranhão","Lajeado Novo","Lima Campos","Loreto","Luís Domingues","Magalhães de Almeida","Maracaçumé","Marajá do Sena","Maranhãozinho","Mata Roma","Matinha","Matões","Matões do Norte","Milagres do Maranhão","Mirador","Miranda do Norte","Mirinzal","Monção","Montes Altos","Morros","Nina Rodrigues","Nova Colinas","Nova Iorque","Nova Olinda do Maranhão","Olho d'Água das Cunhãs","Olinda Nova do Maranhão","Paço do Lumiar","Palmeirândia","Paraibano","Parnarama","Passagem Franca","Pastos Bons","Paulino Neves","Paulo Ramos","Pedreiras","Pedro do Rosário","Penalva","Peri Mirim","Peritoró","Pindaré-Mirim","Pinheiro","Pio XII","Pirapemas","Poção de Pedras","Porto Franco","Porto Rico do Maranhão","Presidente Dutra","Presidente Juscelino","Presidente Médici","Presidente Sarney","Presidente Vargas","Primeira Cruz","Raposa","Riachão","Ribamar Fiquene","Rosário","Sambaíba","Santa Filomena do Maranhão","Santa Helena","Santa Inês","Santa Luzia","Santa Luzia do Paruá","Santa Quitéria do Maranhão","Santa Rita","Santana do Maranhão","Santo Amaro do Maranhão","Santo Antônio dos Lopes","São Benedito do Rio Preto","São Bento","São Bernardo","São Domingos do Azeitão","São Domingos do Maranhão","São Félix de Balsas","São Francisco do Brejão","São Francisco do Maranhão","São João Batista","São João do Carú","São João do Paraíso","São João do Soter","São João dos Patos","São José de Ribamar","São José dos Basílios","São Luís","São Luís Gonzaga do Maranhão","São Mateus do Maranhão","São Pedro da Água Branca","São Pedro dos Crentes","São Raimundo das Mangabeiras","São Raimundo do Doca Bezerra","São Roberto","São Vicente Ferrer","Satubinha","Senador Alexandre Costa","Senador La Rocque","Serrano do Maranhão","Sítio Novo","Sucupira do Norte","Sucupira do Riachão","Tasso Fragoso","Timbiras","Timon","Trizidela do Vale","Tufilândia","Tuntum","Turiaçu","Turilândia","Tutóia","Urbano Santos","Vargem Grande","Viana","Vila Nova dos Martírios","Vitória do Mearim","Vitorino Freire","Zé Doca"]};
 
 /* =========================================================
@@ -813,19 +839,6 @@ function renderIntro() {
   document.getElementById("start").onclick = () => go(0);
 }
 
-function openLightbox(image) {
-  const box = document.createElement("div");
-  box.className = "lightbox";
-  box.setAttribute("role", "dialog");
-  box.setAttribute("aria-label", "Imagem ampliada");
-  box.innerHTML = `<img src="${image.src}" alt="${esc(image.alt)}"><button class="lightbox-close" aria-label="Fechar">&times;</button>`;
-  const close = () => { box.remove(); document.removeEventListener("keydown", onKey); };
-  const onKey = e => { if (e.key === "Escape") close(); };
-  box.onclick = close;
-  document.addEventListener("keydown", onKey);
-  document.body.appendChild(box);
-}
-
 function renderQuestion(i) {
   const q = QUESTIONS[i];
   topBar.hidden = false;
@@ -835,31 +848,33 @@ function renderQuestion(i) {
       <button class="btn-back" id="back">${I.back} Voltar</button>
       <span class="eyebrow">${esc(q.label)}</span>
       <h2>${q.title}</h2>
-      ${q.image ? `
-      <figure class="q-figure">
-        <button class="q-zoom" id="zoomOpen" aria-label="Ampliar imagem"><img src="${q.image.src}" alt="${esc(q.image.alt)}" width="1400" height="933"></button>
-        <figcaption>Toque na imagem para ampliar</figcaption>
-      </figure>` : ""}
+      ${q.image ? `<button type="button" class="q-figure" id="qFigure" aria-label="Ampliar imagem"><img src="${q.image.src}" width="${q.image.w}" height="${q.image.h}" alt="${esc(q.image.alt)}"><span class="zoom-hint">Toque para ampliar</span></button>` : ""}
       <div class="options" role="radiogroup">
         ${q.options.map((o, n) => `
           <button class="option${state.answers[i] === n ? " selected" : ""}" role="radio" aria-checked="${state.answers[i] === n}" data-n="${n}">
             <span class="ico">${I[o.icon]}</span>
-            <span class="txt"><span class="t">${esc(o.t)}</span><span class="d">${esc(o.d)}</span></span>
+            <span class="txt"><span class="t">${esc(o.t)}</span>${o.d ? `<span class="d">${esc(o.d)}</span>` : ""}</span>
             <span class="check">${I.check}</span>
           </button>`).join("")}
       </div>
       <div class="other-box" id="otherBox"${q.options[state.answers[i]]?.open ? "" : " hidden"}>
-        <div class="field"><label for="otherInput">Qual é o seu segmento?</label><input id="otherInput" maxlength="60" placeholder="Ex.: Loja de conveniência" value="${esc(state.other[i] || "")}"></div>
+        <div class="field"><label for="otherInput">${esc(q.other?.label || "Qual?")}</label><input id="otherInput" maxlength="60" placeholder="${esc(q.other?.placeholder || "")}" value="${esc(state.other[i] || "")}"><span class="err"></span></div>
         <button class="btn" id="otherNext">Continuar ${I.arrow}</button>
       </div>
     </section>`;
   document.getElementById("back").onclick = () => go(i - 1);
-  const zoomOpen = document.getElementById("zoomOpen");
-  if (zoomOpen) zoomOpen.onclick = () => openLightbox(q.image);
+  if (q.image) document.getElementById("qFigure").onclick = () => openZoom(q.image);
   const otherBox = document.getElementById("otherBox");
   const otherInput = document.getElementById("otherInput");
+  // "Outro" exige o texto preenchido para avançar
   document.getElementById("otherNext").onclick = () => {
-    state.other[i] = otherInput.value.trim();
+    const v = otherInput.value.trim();
+    const field = otherInput.closest(".field");
+    const msg = v.length < 2 ? (q.other?.error || "Preencha este campo.") : "";
+    field.classList.toggle("invalid", !!msg);
+    field.querySelector(".err").textContent = msg;
+    if (msg) return otherInput.focus();
+    state.other[i] = v;
     go(i + 1);
   };
   otherInput.addEventListener("keydown", e => { if (e.key === "Enter") document.getElementById("otherNext").click(); });
@@ -878,6 +893,22 @@ function renderQuestion(i) {
   });
 }
 
+// Imagem ampliada dentro da própria página (o lead não sai do quiz)
+function openZoom(img) {
+  const box = document.createElement("div");
+  box.className = "zoom";
+  box.setAttribute("role", "dialog");
+  box.setAttribute("aria-modal", "true");
+  box.innerHTML = `<button type="button" class="zoom-close" aria-label="Fechar">&times;</button><img src="${img.src}" alt="${esc(img.alt)}">`;
+  const close = () => { box.remove(); document.removeEventListener("keydown", onKey); document.body.style.overflow = ""; };
+  const onKey = e => { if (e.key === "Escape") close(); };
+  box.onclick = close;
+  document.addEventListener("keydown", onKey);
+  document.body.style.overflow = "hidden";
+  document.body.appendChild(box);
+  box.querySelector(".zoom-close").focus();
+}
+
 function renderForm() {
   topBar.hidden = false;
   setProgress(QUESTIONS.length);
@@ -890,7 +921,15 @@ function renderForm() {
       <p class="lead">Preencha seus dados para que um especialista Só Aço entre em contato e ajude no seu projeto.</p>
       <form id="leadForm" novalidate>
         <div class="field"><label for="nome">Nome</label><input id="nome" name="nome" autocomplete="name" placeholder="Seu nome completo" value="${esc(l.nome || "")}"><span class="err"></span></div>
-        <div class="field"><label for="whats">WhatsApp</label><input id="whats" name="whats" type="tel" inputmode="numeric" autocomplete="tel" placeholder="(00) 00000-0000" value="${esc(l.whats || "")}"><span class="err"></span></div>
+        <div class="row">
+          <div class="field"><label for="whats">WhatsApp</label><input id="whats" name="whats" type="tel" inputmode="numeric" autocomplete="tel" placeholder="(00) 00000-0000" value="${esc(l.whats || "")}"><span class="err"></span></div>
+          <div class="field"><label for="cargo">Cargo</label>
+            <select id="cargo" name="cargo">
+              <option value="">Selecione o cargo</option>
+              ${CARGOS.map(c => `<option${l.cargo === c ? " selected" : ""}>${c}</option>`).join("")}
+            </select><span class="err"></span></div>
+        </div>
+        <div class="field" id="cargoOutroField"${l.cargo === "Outro" ? "" : " hidden"}><label for="cargo_outro">Qual é o seu cargo?</label><input id="cargo_outro" name="cargo_outro" maxlength="60" placeholder="Ex.: Gerente de logística" value="${esc(l.cargo_outro || "")}"><span class="err"></span></div>
         <div class="row">
           <div class="field"><label for="empresa">Empresa</label><input id="empresa" name="empresa" autocomplete="organization" placeholder="Nome da empresa" value="${esc(l.empresa || "")}"><span class="err"></span></div>
           <div class="field"><label for="cnpj">CNPJ</label><input id="cnpj" name="cnpj" autocapitalize="characters" autocomplete="off" placeholder="00.000.000/0000-00" value="${esc(l.cnpj || "")}"><span class="err"></span></div>
@@ -904,6 +943,13 @@ function renderForm() {
           <div class="field"><label for="cidade">Cidade</label>
             <select id="cidade" name="cidade" disabled><option value="">Selecione o estado primeiro</option></select><span class="err"></span></div>
         </div>
+        <fieldset class="field choices" id="contatoField">
+          <legend>Prefere que nosso especialista entre em contato via WhatsApp ou ligação?</legend>
+          <div class="choice-row">
+            ${CONTATOS.map(c => `<label class="choice"><input type="radio" name="contato" value="${c}"${l.contato === c ? " checked" : ""}><span>${c}</span></label>`).join("")}
+          </div>
+          <span class="err"></span>
+        </fieldset>
         <button class="btn" type="submit">Enviar minhas respostas ${I.arrow}</button>
         <p class="privacy">${I.lock} Seus dados estão protegidos e serão usados apenas para o contato da Só Aço sobre o seu projeto.</p>
       </form>
@@ -914,6 +960,14 @@ function renderForm() {
   whats.addEventListener("input", () => { whats.value = maskPhone(whats.value); });
   const cnpj = document.getElementById("cnpj");
   cnpj.addEventListener("input", () => { cnpj.value = maskCNPJ(cnpj.value); });
+
+  // Cargo "Outro" exige o texto preenchido
+  const cargo = document.getElementById("cargo");
+  const cargoOutroField = document.getElementById("cargoOutroField");
+  cargo.addEventListener("change", () => {
+    cargoOutroField.hidden = cargo.value !== "Outro";
+    if (!cargoOutroField.hidden) document.getElementById("cargo_outro").focus();
+  });
 
   const estado = document.getElementById("estado");
   const cidade = document.getElementById("cidade");
@@ -935,23 +989,30 @@ function renderForm() {
       whats: f.whats.value.trim(),
       empresa: f.empresa.value.trim(),
       cnpj: f.cnpj.value.trim(),
+      cargo: f.cargo.value,
+      cargo_outro: f.cargo.value === "Outro" ? f.cargo_outro.value.trim() : "",
       estado: f.estado.value,
-      cidade: f.cidade.value
+      cidade: f.cidade.value,
+      contato: (f.querySelector('input[name="contato"]:checked') || {}).value || ""
     };
     const errors = {
       nome: data.nome.length < 3 ? "Informe seu nome." : "",
       whats: data.whats.replace(/\D/g, "").length < 10 ? "Informe um WhatsApp válido com DDD." : "",
       empresa: data.empresa.length < 2 ? "Informe o nome da empresa." : "",
       cnpj: !validCNPJ(data.cnpj) ? "Informe um CNPJ válido." : "",
+      cargo: !data.cargo ? "Selecione o seu cargo." : "",
+      cargo_outro: data.cargo === "Outro" && data.cargo_outro.length < 2 ? "Informe o seu cargo." : "",
       estado: !data.estado ? "Selecione o estado." : "",
-      cidade: !data.cidade ? "Selecione a cidade." : ""
+      cidade: !data.cidade ? "Selecione a cidade." : "",
+      contato: !data.contato ? "Escolha como prefere ser contatado." : ""
     };
     let first = null;
     Object.entries(errors).forEach(([k, msg]) => {
-      const field = f[k].closest(".field");
+      const el = k === "contato" ? f.querySelector('input[name="contato"]') : f[k];
+      const field = el.closest(".field");
       field.classList.toggle("invalid", !!msg);
       field.querySelector(".err").textContent = msg;
-      if (msg && !first) first = f[k];
+      if (msg && !first) first = el;
     });
     if (first) return first.focus();
     state.lead = data;
@@ -1034,8 +1095,11 @@ function buildLeadPayload(result) {
   const solucao = SOLUTIONS[result.main].name;
   const alternativa = SOLUTIONS[result.second].name;
   const temperatura = leadTemperature();
+  const cargo = lead.cargo === "Outro" && lead.cargo_outro ? `Outro: ${lead.cargo_outro}` : lead.cargo;
   const notes = [
     `Lead do ${CONFIG.source}`,
+    `Cargo: ${cargo}`,
+    `Prefere contato por: ${lead.contato}`,
     `Empresa: ${lead.empresa}`,
     `CNPJ: ${lead.cnpj}`,
     `Cidade/UF: ${lead.cidade}/${lead.estado}`,
@@ -1063,6 +1127,8 @@ function buildLeadPayload(result) {
     state: lead.estado,
     // Dados complementares do quiz
     company: lead.empresa,
+    cargo,
+    contato_preferido: lead.contato,
     source: CONFIG.source,
     solucao,
     solucao_alternativa: alternativa,
@@ -1202,7 +1268,7 @@ function renderThanks() {
       <div class="seal">${I.check}</div>
       <span class="eyebrow">Respostas enviadas</span>
       <h1>Obrigado, <em>${esc(firstName)}</em>!</h1>
-      <p class="lead">Recebemos as informações da sua operação. Em breve, um especialista da equipe Só Aço vai entrar em contato pelo WhatsApp <b>${esc(state.lead.whats)}</b> para entender o seu projeto.</p>
+      <p class="lead">Recebemos as informações da sua operação. Em breve, um especialista da equipe Só Aço vai entrar em contato ${state.lead.contato === "Ligação" ? "por ligação no número" : "pelo WhatsApp"} <b>${esc(state.lead.whats)}</b> para entender o seu projeto.</p>
       <ol class="steps">
         <li class="done">Suas respostas chegaram à nossa equipe</li>
         <li>Um especialista analisa a sua operação</li>
