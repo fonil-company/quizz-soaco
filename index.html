@@ -462,6 +462,20 @@
     *, *::before, *::after { animation: none !important; transition: none !important; }
   }
 </style>
+<!-- Meta Pixel (PageView, QuizStart, QuizFormView e Lead com event_id; o Lead também vai pela Conversions API via /api/meta-event) -->
+<script>
+!function(f,b,e,v,n,t,s){if(f.fbq)return;n=f.fbq=function(){n.callMethod?
+n.callMethod.apply(n,arguments):n.queue.push(arguments)};if(!f._fbq)f._fbq=n;
+n.push=n;n.loaded=!0;n.version='2.0';n.queue=[];t=b.createElement(e);t.async=!0;
+t.src=v;s=b.getElementsByTagName(e)[0];s.parentNode.insertBefore(t,s)}(window,
+document,'script','https://connect.facebook.net/en_US/fbevents.js');
+fbq('init', '1063603920051123');
+fbq('track', 'PageView');
+</script>
+<noscript><img height="1" width="1" style="display:none" alt="" src="https://www.facebook.com/tr?id=1063603920051123&ev=PageView&noscript=1"></noscript>
+
+<!-- Umbrella CRM (ID do quiz): rastreamento (first/last touch, UTMs, _fbc). O lead em si vai pelo servidor (/api/lead-umbrella). -->
+<script src="https://crm-api.umbrellaecosystem.com.br/api/v1/public/t/ccb11b73-1a83-4674-ae2b-f089dc1cf252.js" defer></script>
 </head>
 <body>
 <div class="wrap">
@@ -483,8 +497,15 @@
    CONFIGURAÇÃO
    ========================================================= */
 const CONFIG = {
-  // Webhook de leads do CRM Fonil (recebe o lead em JSON via POST)
-  webhook: "https://crm.fonilgroup.com.br/api/webhooks/leads/cmvjv1e85004prkvni2juj0uk",
+  // Lead vai para /api/lead no próprio domínio; o Nginx repassa ao webhook do Fonil CRM
+  // (CRM_WEBHOOK_URL no Dockerfile/Easypanel), então o token não aparece na página.
+  webhook: "/api/lead",
+  // Mesmo lead para o Umbrella CRM, pelo Nginx (CRM_UMBRELLA_WEBHOOK_URL)
+  umbrella: "/api/lead-umbrella",
+  // Meta Conversions API: o Nginx repassa ao Meta com o token (META_CAPI_TOKEN)
+  meta: "/api/meta-event",
+  // Produto enviado ao CRM (mesmo valor da LP)
+  product: "Porta-pallets",
   // Origem do lead registrada no CRM
   source: "Quiz Só Aço"
 };
@@ -659,19 +680,28 @@ let advanceTimer = null;
 document.getElementById("year").textContent = new Date().getFullYear();
 bar.innerHTML = QUESTIONS.map(() => "<span></span>").join("");
 
-// UTMs e IDs de clique da URL de chegada; guardados na sessão para não se perderem
+// UTMs e IDs de clique da URL de chegada; guardados por 90 dias no navegador (igual à LP)
 function captureTracking() {
   const KEYS = ["utm_source", "utm_medium", "utm_campaign", "utm_term", "utm_content", "utm_id", "gclid", "gbraid", "wbraid", "fbclid", "ttclid", "msclkid"];
   let saved = {};
-  try { saved = JSON.parse(sessionStorage.getItem("soaco_tracking")) || {}; } catch (e) {}
+  try { saved = JSON.parse(localStorage.getItem("soaco_tracking")) || {}; } catch (e) {}
+  if (saved.exp && saved.exp < Date.now()) saved = {};
   const params = new URLSearchParams(location.search);
   const fromUrl = {};
   KEYS.forEach(k => { const v = params.get(k); if (v) fromUrl[k] = v.trim(); });
-  const tracking = Object.keys(fromUrl).length
-    ? { ...fromUrl, landing_page: location.href, referrer: document.referrer || "" }
-    : { landing_page: location.href, referrer: document.referrer || "", ...saved };
-  try { sessionStorage.setItem("soaco_tracking", JSON.stringify(tracking)); } catch (e) {}
+  let tracking;
+  if (Object.keys(fromUrl).length) {
+    tracking = { ...fromUrl, landing_page: location.href, referrer: document.referrer || "", ts: Date.now(), exp: Date.now() + 90 * 864e5 };
+    try { localStorage.setItem("soaco_tracking", JSON.stringify(tracking)); } catch (e) {}
+  } else {
+    tracking = { landing_page: location.href, referrer: document.referrer || "", ...saved };
+  }
   return tracking;
+}
+
+function readCookie(n) {
+  const m = document.cookie.match("(?:^|; )" + n + "=([^;]*)");
+  return m ? decodeURIComponent(m[1]) : "";
 }
 
 function esc(s) {
@@ -691,6 +721,9 @@ function setProgress(i) {
 function go(step) {
   clearTimeout(advanceTimer);
   state.step = step;
+  // Funil no Meta: início do quiz e chegada ao formulário (uma vez cada)
+  if (step === 0) trackOnce("QuizStart");
+  if (step === QUESTIONS.length) trackOnce("QuizFormView");
   window.scrollTo({ top: 0, behavior: "smooth" });
   if (step < 0) return renderIntro();
   if (step < QUESTIONS.length) return renderQuestion(step);
@@ -973,6 +1006,9 @@ function buildLeadPayload(result) {
     temperatura,
     respostas: Object.fromEntries(respostas.map(r => [r.label, r.value])),
     ...Object.fromEntries(QUESTIONS.map((q, i) => [q.key, respostas[i].value])),
+    // Mesmos campos que a LP manda ao CRM
+    segment: respostas[0].value,
+    product: CONFIG.product,
     // Rastreamento
     utm_source: t.utm_source || "",
     utm_medium: t.utm_medium || "",
@@ -986,7 +1022,10 @@ function buildLeadPayload(result) {
     fbclid: t.fbclid || "",
     ttclid: t.ttclid || "",
     msclkid: t.msclkid || "",
-    utms: Object.fromEntries(Object.entries(t).filter(([k]) => k !== "landing_page" && k !== "referrer")),
+    utms: Object.fromEntries(Object.entries(t).filter(([k]) => !["landing_page", "referrer", "ts", "exp"].includes(k))),
+    // Meta: cookies do Pixel (_fbp/_fbc); sem Pixel, o fbc é montado a partir do fbclid
+    fbp: readCookie("_fbp"),
+    fbc: readCookie("_fbc") || (t.fbclid ? `fb.1.${t.ts || Date.now()}.${t.fbclid}` : ""),
     landing_page: t.landing_page,
     referrer: t.referrer,
     notes,
@@ -994,20 +1033,100 @@ function buildLeadPayload(result) {
   };
 }
 
-// O CRM não envia cabeçalhos CORS: o POST vai como "simple request" (text/plain + no-cors),
-// que o navegador entrega sem preflight; o CRM lê o corpo como JSON mesmo assim.
-function sendLead(result) {
-  if (!CONFIG.webhook || state.leadSent) return;
-  state.leadSent = true;
-  const body = JSON.stringify(buildLeadPayload(result));
-  const post = () => fetch(CONFIG.webhook, {
+// Envia o lead pelo Nginx (mesmo domínio: sem CORS) ao Fonil CRM e ao Umbrella CRM. Uma nova tentativa em caso de falha.
+// Falhas aparecem no console como [CRM]/[UMBRELLA] e no dataLayer como crm_lead_error/umbrella_lead_error (igual à LP).
+function postLead(endpoint, payload, tag) {
+  const body = JSON.stringify(payload);
+  const post = () => fetch(endpoint, {
     method: "POST",
-    mode: "no-cors",
-    headers: { "Content-Type": "text/plain;charset=UTF-8" },
+    headers: { "Content-Type": "application/json" },
     body,
     keepalive: true
-  });
-  post().catch(() => setTimeout(() => post().catch(() => {}), 1500));
+  }).then(r => { if (!r.ok) throw new Error("HTTP " + r.status); });
+  post()
+    .catch(() => new Promise(res => setTimeout(res, 1500)).then(post))
+    .then(() => window.dataLayer.push({ event: tag + "_lead_ok" }))
+    .catch(err => {
+      console.warn("[" + tag.toUpperCase() + "] falha ao enviar lead:", err);
+      window.dataLayer.push({ event: tag + "_lead_error" });
+    });
+}
+
+function sendLead(result) {
+  if (state.leadSent) return;
+  state.leadSent = true;
+  window.dataLayer = window.dataLayer || [];
+  const lead = buildLeadPayload(result);
+  if (CONFIG.webhook) postLead(CONFIG.webhook, lead, "crm");
+
+  // Umbrella: mesmo lead no formato do snippet oficial (event_id, landingUrl, referrer, _fbc/_fbp)
+  // Mesmo event_id no Umbrella, no Pixel e na Conversions API
+  const eventId = (window.crypto && crypto.randomUUID) ? crypto.randomUUID() : Date.now() + "-" + Math.random().toString(16).slice(2);
+  if (CONFIG.umbrella) {
+    const umb = { ...lead, event_id: eventId, browserEventId: eventId, landingUrl: lead.landing_page, referrer: document.referrer || lead.referrer || "" };
+    if (lead.fbp) umb._fbp = lead.fbp;
+    if (lead.fbc) umb._fbc = lead.fbc;
+    postLead(CONFIG.umbrella, umb, "umbrella");
+  }
+
+  // Meta: Lead no Pixel (navegador) e na Conversions API (servidor) com o mesmo event_id, para o Meta deduplicar
+  const custom = { content_name: lead.solucao, content_category: lead.segment, lead_temperature: lead.temperatura, lead_source: CONFIG.source };
+  if (typeof window.fbq === "function") window.fbq("track", "Lead", custom, { eventID: eventId });
+  if (CONFIG.meta) metaCapi(eventId, lead, custom);
+}
+
+const tracked = {};
+function trackOnce(name) {
+  if (tracked[name] || typeof window.fbq !== "function") return;
+  tracked[name] = true;
+  window.fbq("trackCustom", name);
+}
+
+// Para validar em Gerenciador de Eventos > Testar eventos, abra o quiz com ?test_event_code=TESTxxxx
+const META_TEST_CODE = (() => {
+  let c = new URLSearchParams(location.search).get("test_event_code") || "";
+  try { if (c) sessionStorage.setItem("soaco_test_code", c); else c = sessionStorage.getItem("soaco_test_code") || ""; } catch (e) {}
+  return c;
+})();
+
+async function sha256(v) {
+  if (!v || !(window.crypto && crypto.subtle && window.TextEncoder)) return "";
+  try {
+    const buf = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(v));
+    return [...new Uint8Array(buf)].map(b => b.toString(16).padStart(2, "0")).join("");
+  } catch (e) { return ""; }
+}
+const plain = v => (v || "").toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^a-z0-9]/g, "");
+
+// Dados pessoais vão com hash SHA-256 (padrão do Meta); o token fica no Nginx, não na página.
+async function metaCapi(eventId, lead, custom) {
+  try {
+    const names = lead.name.trim().split(/\s+/);
+    const raw = {
+      ph: lead.phone ? "55" + lead.phone : "",
+      fn: plain(names[0]),
+      ln: names.length > 1 ? plain(names[names.length - 1]) : "",
+      ct: plain(lead.city),
+      st: plain(lead.state),
+      country: "br",
+      external_id: plain(lead.document)
+    };
+    const ud = { client_user_agent: navigator.userAgent };
+    for (const [k, v] of Object.entries(raw)) { const h = await sha256(v); if (h) ud[k] = h; }
+    if (lead.fbp) ud.fbp = lead.fbp;
+    if (lead.fbc) ud.fbc = lead.fbc;
+    const body = { data: [{
+      event_name: "Lead", event_time: Math.floor(Date.now() / 1000), event_id: eventId,
+      action_source: "website", event_source_url: location.href, user_data: ud, custom_data: custom
+    }] };
+    if (META_TEST_CODE) body.test_event_code = META_TEST_CODE;
+    const r = await fetch(CONFIG.meta, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body), keepalive: true });
+    if (!r.ok) throw new Error("HTTP " + r.status);
+    window.dataLayer.push({ event: "meta_capi_ok" });
+  } catch (err) {
+    console.warn("[META] falha ao enviar Lead pela Conversions API:", err);
+    window.dataLayer.push({ event: "meta_capi_error" });
+  }
 }
 
 // A solução recomendada continua sendo calculada e vai só para o CRM (qualificação do lead);
