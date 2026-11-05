@@ -241,6 +241,45 @@
   /* ---------- Perguntas ---------- */
   .question { gap: 22px; padding-top: 8px; }
   .question .hint { font-size: 14px; color: var(--steel); margin: -10px 0 0; }
+  .q-figure { margin: 0; display: flex; flex-direction: column; gap: 8px; }
+  .q-zoom {
+    display: block;
+    padding: 0;
+    border: 1.5px solid rgba(255,255,255,.12);
+    border-radius: var(--radius);
+    overflow: hidden;
+    background: var(--white);
+    cursor: zoom-in;
+    transition: border-color .2s ease;
+  }
+  .q-zoom:hover { border-color: rgba(248,172,26,.6); }
+  .q-zoom img { width: 100%; height: auto; }
+  .q-figure figcaption { font-size: 12px; color: var(--steel); text-align: center; }
+  .lightbox {
+    position: fixed;
+    inset: 0;
+    z-index: 50;
+    display: grid;
+    place-items: center;
+    padding: max(16px, env(safe-area-inset-top)) 16px max(16px, env(safe-area-inset-bottom));
+    background: rgba(3, 27, 77, .94);
+    cursor: zoom-out;
+    animation: enter .25s ease both;
+  }
+  .lightbox img { max-width: 100%; max-height: calc(100vh - 32px); max-height: calc(100dvh - 32px); width: auto; border-radius: 8px; background: var(--white); }
+  .lightbox-close {
+    position: absolute;
+    top: max(12px, env(safe-area-inset-top));
+    right: 12px;
+    width: 44px;
+    height: 44px;
+    border: 0;
+    border-radius: 50%;
+    background: var(--gold);
+    color: var(--navy);
+    font-size: 28px;
+    line-height: 1;
+  }
   .options {
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -584,6 +623,10 @@ const QUESTIONS = [
     key: "peso",
     label: "Peso por nível",
     title: "Qual o <em>peso médio</em> por nível ou posição?",
+    image: {
+      src: "assets/niveis-armazenagem.webp",
+      alt: "Porta-pallet com 4 níveis: cada par de longarinas na mesma altura forma um nível de armazenagem, e cada nível comporta 2 posições."
+    },
     options: [
       { t: "Até 300 kg", d: "Carga leve", icon: "w1", p: { BAN: 3 } },
       { t: "300 a 1.000 kg", d: "Carga média", icon: "w2", p: { SEL: 2, BAN: 1 } },
@@ -770,6 +813,19 @@ function renderIntro() {
   document.getElementById("start").onclick = () => go(0);
 }
 
+function openLightbox(image) {
+  const box = document.createElement("div");
+  box.className = "lightbox";
+  box.setAttribute("role", "dialog");
+  box.setAttribute("aria-label", "Imagem ampliada");
+  box.innerHTML = `<img src="${image.src}" alt="${esc(image.alt)}"><button class="lightbox-close" aria-label="Fechar">&times;</button>`;
+  const close = () => { box.remove(); document.removeEventListener("keydown", onKey); };
+  const onKey = e => { if (e.key === "Escape") close(); };
+  box.onclick = close;
+  document.addEventListener("keydown", onKey);
+  document.body.appendChild(box);
+}
+
 function renderQuestion(i) {
   const q = QUESTIONS[i];
   topBar.hidden = false;
@@ -779,6 +835,11 @@ function renderQuestion(i) {
       <button class="btn-back" id="back">${I.back} Voltar</button>
       <span class="eyebrow">${esc(q.label)}</span>
       <h2>${q.title}</h2>
+      ${q.image ? `
+      <figure class="q-figure">
+        <button class="q-zoom" id="zoomOpen" aria-label="Ampliar imagem"><img src="${q.image.src}" alt="${esc(q.image.alt)}" width="1400" height="933"></button>
+        <figcaption>Toque na imagem para ampliar</figcaption>
+      </figure>` : ""}
       <div class="options" role="radiogroup">
         ${q.options.map((o, n) => `
           <button class="option${state.answers[i] === n ? " selected" : ""}" role="radio" aria-checked="${state.answers[i] === n}" data-n="${n}">
@@ -793,6 +854,8 @@ function renderQuestion(i) {
       </div>
     </section>`;
   document.getElementById("back").onclick = () => go(i - 1);
+  const zoomOpen = document.getElementById("zoomOpen");
+  if (zoomOpen) zoomOpen.onclick = () => openLightbox(q.image);
   const otherBox = document.getElementById("otherBox");
   const otherInput = document.getElementById("otherInput");
   document.getElementById("otherNext").onclick = () => {
