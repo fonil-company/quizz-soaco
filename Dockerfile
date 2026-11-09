@@ -10,8 +10,11 @@ ENV CRM_UMBRELLA_WEBHOOK_URL="https://crm-api.umbrellaecosystem.com.br/api/v1/we
 ENV META_PIXEL_ID="1063603920051123"
 ENV META_GRAPH_VERSION="v24.0"
 ENV META_CAPI_TOKEN=""
-# Só variáveis CRM_* e META_* são substituídas no template
-ENV NGINX_ENVSUBST_FILTER="^(CRM_|META_)"
+# Planilha de leads: URL do Apps Script publicado como app da Web (termina em /exec).
+# Defina SHEETS_WEBHOOK_URL em Easypanel > Environment. Vazia, o envio para a planilha é ignorado.
+ENV SHEETS_WEBHOOK_URL=""
+# Só variáveis CRM_*, META_* e SHEETS_* são substituídas no template
+ENV NGINX_ENVSUBST_FILTER="^(CRM_|META_|SHEETS_)"
 
 COPY nginx.conf /etc/nginx/templates/default.conf.template
 

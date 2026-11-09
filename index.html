@@ -567,6 +567,8 @@ const CONFIG = {
   webhook: "/api/lead",
   // Mesmo lead para o Umbrella CRM, pelo Nginx (CRM_UMBRELLA_WEBHOOK_URL)
   umbrella: "/api/lead-umbrella",
+  // Planilha de leads (Google Sheets via Apps Script), pelo Nginx (SHEETS_WEBHOOK_URL)
+  sheets: "/api/lead-sheets",
   // Meta Conversions API: o Nginx repassa ao Meta com o token (META_CAPI_TOKEN)
   meta: "/api/meta-event",
   // Produto enviado ao CRM (mesmo valor da LP)
@@ -1162,6 +1164,39 @@ function buildLeadPayload(result) {
   };
 }
 
+// Linha da planilha: as chaves batem com os títulos do Apps Script (integracoes/google-sheets-webhook.gs)
+// e a ordem aqui vira a ordem das colunas quando a planilha está vazia.
+function buildSheetsPayload(lead) {
+  const r = Object.fromEntries(QUESTIONS.map(q => [q.key, lead[q.key]]));
+  return {
+    nome: lead.name,
+    whatsapp: state.lead.whats,
+    empresa: lead.company,
+    cnpj: state.lead.cnpj,
+    cargo: lead.cargo,
+    contato_preferido: lead.contato_preferido,
+    uf: lead.state,
+    cidade: lead.city,
+    segmento: r.segmento,
+    carga: r.carga,
+    peso: r.peso,
+    desafio: r.desafio,
+    pe_direito: r.pe_direito,
+    prazo: r.prazo,
+    solucao: lead.solucao,
+    solucao_alternativa: lead.solucao_alternativa,
+    temperatura: lead.temperatura,
+    gclid: lead.gclid,
+    fbclid: lead.fbclid,
+    utm_source: lead.utm_source,
+    utm_medium: lead.utm_medium,
+    utm_campaign: lead.utm_campaign,
+    utm_term: lead.utm_term,
+    utm_content: lead.utm_content,
+    pagina: lead.landing_page
+  };
+}
+
 // Envia o lead pelo Nginx (mesmo domínio: sem CORS) ao Fonil CRM e ao Umbrella CRM. Uma nova tentativa em caso de falha.
 // Falhas aparecem no console como [CRM]/[UMBRELLA] e no dataLayer como crm_lead_error/umbrella_lead_error (igual à LP).
 function postLead(endpoint, payload, tag) {
@@ -1187,6 +1222,7 @@ function sendLead(result) {
   window.dataLayer = window.dataLayer || [];
   const lead = buildLeadPayload(result);
   if (CONFIG.webhook) postLead(CONFIG.webhook, lead, "crm");
+  if (CONFIG.sheets) postLead(CONFIG.sheets, buildSheetsPayload(lead), "sheets");
 
   // Umbrella: mesmo lead no formato do snippet oficial (event_id, landingUrl, referrer, _fbc/_fbp)
   // Mesmo event_id no Umbrella, no Pixel e na Conversions API
