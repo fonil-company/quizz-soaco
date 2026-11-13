@@ -849,8 +849,8 @@ function go(step) {
     QUESTIONS.forEach(q => { if (q.image) new Image().src = q.image.src; });
   }
   if (step === QUESTIONS.length) trackOnce("QuizFormView");
-  // Etapa na URL: #etapa1…#etapa6 (perguntas), #etapa7 (formulário), #etapa8 (obrigado); tela inicial sem hash
-  try { history.replaceState(null, "", location.pathname + location.search + (step < 0 ? "" : "#etapa" + (step + 1))); } catch (e) {}
+  // Etapa na URL com a versão do quiz: #etapa1-v2…#etapa6-v2 (perguntas), #etapa7-v2 (formulário), #etapa8-v2 (obrigado); tela inicial sem hash
+  try { history.replaceState(null, "", location.pathname + location.search + (step < 0 ? "" : "#etapa" + (step + 1) + "-v2")); } catch (e) {}
   window.scrollTo({ top: 0, behavior: "smooth" });
   if (step < 0) return renderIntro();
   if (step < QUESTIONS.length) return renderQuestion(step);
