@@ -592,7 +592,7 @@ fbq('track', 'PageView');
   <main id="app">
     <section class="screen intro">
       <div class="logo"><img src="assets/logo-so-aco.webp" alt="Só Aço" width="128" height="128" fetchpriority="high"></div>
-      <h1>Compre <span class="nowrap">porta pallets</span> com <em>preço de fábrica</em>, com <em>frete grátis</em> para o Piauí e Maranhão.</h1>
+      <h1>Compre <span class="nowrap">porta pallet</span> com <em>preço de fábrica</em> direto para a sua empresa.</h1>
       <p class="lead">Responda 6 perguntas rápidas para entendermos qual tipo de porta pallet se adequa melhor ao seu espaço e a equipe da Só Aço entrará em contato.</p>
       <div class="gallery"><div class="gallery-track"><img src="assets/porta-pallet-1.webp" alt="Porta-pallet Só Aço instalado em galpão" width="330" height="440" decoding="async"><img src="assets/porta-pallet-2.webp" alt="Porta-pallet com mercadorias armazenadas" width="330" height="440" decoding="async"><img src="assets/porta-pallet-3.webp" alt="Corredor entre estruturas de porta-pallet" width="330" height="440" decoding="async"><img src="assets/porta-pallet-4.webp" alt="Galpão com porta-pallets dos dois lados do corredor" width="330" height="440" decoding="async"><img src="assets/porta-pallet-5.webp" alt="Estrutura de porta-pallet de grande altura" width="330" height="440" decoding="async"><img src="assets/porta-pallet-1.webp" aria-hidden="true" alt="" width="330" height="440" decoding="async"><img src="assets/porta-pallet-2.webp" aria-hidden="true" alt="" width="330" height="440" decoding="async"><img src="assets/porta-pallet-3.webp" aria-hidden="true" alt="" width="330" height="440" decoding="async"><img src="assets/porta-pallet-4.webp" aria-hidden="true" alt="" width="330" height="440" decoding="async"><img src="assets/porta-pallet-5.webp" aria-hidden="true" alt="" width="330" height="440" decoding="async"></div></div>
       <div class="facts">
@@ -849,8 +849,8 @@ function go(step) {
     QUESTIONS.forEach(q => { if (q.image) new Image().src = q.image.src; });
   }
   if (step === QUESTIONS.length) trackOnce("QuizFormView");
-  // Etapa na URL com a versão do quiz: #etapa1-v2…#etapa6-v2 (perguntas), #etapa7-v2 (formulário), #etapa8-v2 (obrigado); tela inicial sem hash
-  try { history.replaceState(null, "", location.pathname + location.search + (step < 0 ? "" : "#etapa" + (step + 1) + "-v2")); } catch (e) {}
+  // Etapa na URL: #etapa1…#etapa6 (perguntas), #etapa7 (formulário), #etapa8 (obrigado); tela inicial sem hash
+  try { history.replaceState(null, "", location.pathname + location.search + (step < 0 ? "" : "#etapa" + (step + 1))); } catch (e) {}
   window.scrollTo({ top: 0, behavior: "smooth" });
   if (step < 0) return renderIntro();
   if (step < QUESTIONS.length) return renderQuestion(step);
@@ -957,7 +957,10 @@ function renderForm() {
             </select><span class="err"></span></div>
         </div>
         <div class="field" id="cargoOutroField"${l.cargo === "Outro" ? "" : " hidden"}><label for="cargo_outro">Qual é o seu cargo?</label><input id="cargo_outro" name="cargo_outro" maxlength="60" placeholder="Ex.: Gerente de logística" value="${esc(l.cargo_outro || "")}"><span class="err"></span></div>
-        <div class="field"><label for="empresa">Empresa</label><input id="empresa" name="empresa" autocomplete="organization" placeholder="Nome da empresa" value="${esc(l.empresa || "")}"><span class="err"></span></div>
+        <div class="row">
+          <div class="field"><label for="empresa">Empresa</label><input id="empresa" name="empresa" autocomplete="organization" placeholder="Nome da empresa" value="${esc(l.empresa || "")}"><span class="err"></span></div>
+          <div class="field"><label for="cnpj">CNPJ</label><input id="cnpj" name="cnpj" autocapitalize="characters" autocomplete="off" placeholder="00.000.000/0000-00" value="${esc(l.cnpj || "")}"><span class="err"></span></div>
+        </div>
         <div class="row">
           <div class="field"><label for="estado">Estado</label>
             <select id="estado" name="estado">
@@ -982,6 +985,8 @@ function renderForm() {
 
   const whats = document.getElementById("whats");
   whats.addEventListener("input", () => { whats.value = maskPhone(whats.value); });
+  const cnpj = document.getElementById("cnpj");
+  cnpj.addEventListener("input", () => { cnpj.value = maskCNPJ(cnpj.value); });
 
   // Cargo "Outro" exige o texto preenchido
   const cargo = document.getElementById("cargo");
@@ -1010,6 +1015,7 @@ function renderForm() {
       nome: f.nome.value.trim(),
       whats: f.whats.value.trim(),
       empresa: f.empresa.value.trim(),
+      cnpj: f.cnpj.value.trim(),
       cargo: f.cargo.value,
       cargo_outro: f.cargo.value === "Outro" ? f.cargo_outro.value.trim() : "",
       estado: f.estado.value,
@@ -1020,6 +1026,7 @@ function renderForm() {
       nome: data.nome.length < 3 ? "Informe seu nome." : "",
       whats: data.whats.replace(/\D/g, "").length < 10 ? "Informe um WhatsApp válido com DDD." : "",
       empresa: data.empresa.length < 2 ? "Informe o nome da empresa." : "",
+      cnpj: !validCNPJ(data.cnpj) ? "Informe um CNPJ válido." : "",
       cargo: !data.cargo ? "Selecione o seu cargo." : "",
       cargo_outro: data.cargo === "Outro" && data.cargo_outro.length < 2 ? "Informe o seu cargo." : "",
       estado: !data.estado ? "Selecione o estado." : "",
@@ -1046,6 +1053,32 @@ function maskPhone(v) {
   if (d.length <= 6) return `(${d.slice(0, 2)}) ${d.slice(2)}`;
   if (d.length <= 10) return `(${d.slice(0, 2)}) ${d.slice(2, 6)}-${d.slice(6)}`;
   return `(${d.slice(0, 2)}) ${d.slice(2, 7)}-${d.slice(7)}`;
+}
+
+// Aceita o CNPJ numérico e o novo alfanumérico (Receita Federal, a partir de jul/2026)
+function maskCNPJ(v) {
+  const c = v.toUpperCase().replace(/[^0-9A-Z]/g, "").slice(0, 14);
+  let o = c.slice(0, 2);
+  if (c.length > 2) o += "." + c.slice(2, 5);
+  if (c.length > 5) o += "." + c.slice(5, 8);
+  if (c.length > 8) o += "/" + c.slice(8, 12);
+  if (c.length > 12) o += "-" + c.slice(12);
+  return o;
+}
+
+function validCNPJ(v) {
+  const c = v.toUpperCase().replace(/[^0-9A-Z]/g, "");
+  if (!/^[0-9A-Z]{12}\d{2}$/.test(c) || /^(\d)\1{13}$/.test(c)) return false;
+  const dv = len => {
+    let sum = 0, w = len - 7;
+    for (let i = 0; i < len; i++) {
+      sum += (c.charCodeAt(i) - 48) * w--;
+      if (w < 2) w = 9;
+    }
+    const r = sum % 11;
+    return r < 2 ? 0 : 11 - r;
+  };
+  return dv(12) === Number(c[12]) && dv(13) === Number(c[13]);
 }
 
 function showLoading() {
@@ -1095,6 +1128,7 @@ function buildLeadPayload(result) {
     `Cargo: ${cargo}`,
     `Prefere contato por: ${lead.contato}`,
     `Empresa: ${lead.empresa}`,
+    `CNPJ: ${lead.cnpj}`,
     `Cidade/UF: ${lead.cidade}/${lead.estado}`,
     "",
     "Respostas do quiz:",
@@ -1115,6 +1149,7 @@ function buildLeadPayload(result) {
     // Campos padrão do webhook
     phone: lead.whats.replace(/\D/g, ""),
     name: lead.nome,
+    document: lead.cnpj.toUpperCase().replace(/[^0-9A-Z]/g, ""),
     city: lead.cidade,
     state: lead.estado,
     // Dados complementares do quiz
@@ -1162,7 +1197,7 @@ function buildSheetsPayload(lead) {
     nome: lead.name,
     whatsapp: state.lead.whats,
     empresa: lead.company,
-    cnpj: "", // V2 não pede CNPJ; a coluna fica vazia para não desalinhar a planilha
+    cnpj: state.lead.cnpj,
     cargo: lead.cargo,
     contato_preferido: lead.contato_preferido,
     uf: lead.state,
@@ -1263,7 +1298,8 @@ async function metaCapi(eventId, lead, custom) {
       ln: names.length > 1 ? plain(names[names.length - 1]) : "",
       ct: plain(lead.city),
       st: plain(lead.state),
-      country: "br"
+      country: "br",
+      external_id: plain(lead.document)
     };
     const ud = { client_user_agent: navigator.userAgent };
     for (const [k, v] of Object.entries(raw)) { const h = await sha256(v); if (h) ud[k] = h; }
